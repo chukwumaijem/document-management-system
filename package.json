@@ -1,0 +1,32 @@
+{
+  "name": "document-management-system",
+  "version": "1.0.0",
+  "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aezumezu/document-management-system.git"
+  },
+  "author": "Ezumezu Anselm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aezumezu/document-management-system/issues"
+  },
+  "homepage": "https://github.com/aezumezu/document-management-system#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "jsonwebtoken": "^7.1.9",
+    "pg": "^6.1.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.24.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "supertest": "^2.0.0"
+  }
+}
