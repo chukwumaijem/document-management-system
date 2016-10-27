@@ -8,8 +8,9 @@ describe('Search documents', function () {
     api.get('/documents/query?limit=5&role=admin')
       .expect(200).end((err, res) => {
         expect(res.body).to.have.lengthOf(1);
+        if (err) return done(err);
+        done();
       });
-    done();
   });
 
   it('should print appropriate message if document do not exist for a role', function (done) {
@@ -17,16 +18,18 @@ describe('Search documents', function () {
       .expect(200).end((err, res) => {
         expect(res.body).to.have.property('message');
         expect(res.body.message).to.equal('No document exists for this user.');
+        if (err) return done(err);
+        done();
       });
-    done();
   });
 
-  it('should return documents that were published ona certain date', function(done) {
+  it('should return documents that were published ona certain date', function (done) {
     api.get('/documents/query?limit=5&date=2016-10-17')
       .expect(200).end((err, res) => {
         expect(res.body).to.have.lengthOf(5);
+        if (err) return done(err);
+        done();
       });
-    done();
   });
 
   it('should print appropriate message if document do not exist for a date', function (done) {
@@ -34,7 +37,8 @@ describe('Search documents', function () {
       .expect(200).end((err, res) => {
         expect(res.body).to.have.property('message');
         expect(res.body.message).to.equal('No document was published on this date.');
+        if (err) return done(err);
+        done();
       });
-    done();
   });
 });
