@@ -4,16 +4,16 @@ const app = require('../../server'),
   api = supertest(app);
 
 describe('User Tests', function () {
+  let userOne = {
+    username: 'helen',
+    firstName: 'Helena',
+    lastName: 'Johnson',
+    email: 'helen@nson.com',
+    password: 'helenpass',
+    role: 'admin'
+  };
 
   describe('Create user', function () {
-    let userOne = {
-      username: 'helen',
-      firstName: 'Helena',
-      lastName: 'Johnson',
-      email: 'helen@nson.com',
-      password: 'helenpass',
-      role: 'admin'
-    };
 
     it('should validate that required user data is provided', function (done) {
       api.post('/users').send(userOne)
@@ -24,8 +24,9 @@ describe('User Tests', function () {
           expect(res.body).to.have.property('email');
           expect(res.body).to.have.property('password');
           expect(res.body).to.have.property('role');
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should validate that provied user data is valid', function (done) {
@@ -37,8 +38,9 @@ describe('User Tests', function () {
           expect(res.body.email).to.not.be.empty;
           expect(res.body.password).to.not.be.empty;
           expect(res.body.role).to.not.be.empty;
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should add a new user to the database', function (done) {
@@ -60,8 +62,9 @@ describe('User Tests', function () {
           expect(res.body.password).to.equal(userOne.password);
           expect(res.body.role).to.have.property(userOne.role);
           expect(res.body.token).to.not.be.empty;
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should validate that a new user created is unique', function (done) {
@@ -69,8 +72,9 @@ describe('User Tests', function () {
         .expect(400).end((err, res) => {
           expect(res.body).to.have.property('error');
           expect(res.body.error).to.be('User already exist.');
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should validate that a new user created has a role', function (done) {
@@ -88,8 +92,9 @@ describe('User Tests', function () {
           expect(res.body).to.have.property('role');
           expect(res.body.role).to.not.be.empty;
           expect(res.body.role).to.equal(userTwo.role);
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should validate that a new user has firstName and lastName', function (done) {
@@ -108,8 +113,9 @@ describe('User Tests', function () {
           expect(res.body).to.have.property('lastName');
           expect(res.body.firstName).to.equal(userThree.firstName);
           expect(res.body.lastName).to.equal(userThree.lastName);
+          if (err) return done(err);
+          done();
         });
-      done();
     });
   });
 
@@ -118,8 +124,9 @@ describe('User Tests', function () {
       api.get('/users').send(userOne)
         .expect(200).end((err, res) => {
           expect(res.body).to.have.lengthOf(8);
+          if (err) return done(err);
+          done();
         });
-      done();
     });
 
     it('should return the user with the specified user-id', function (done) {
@@ -138,8 +145,9 @@ describe('User Tests', function () {
           expect(res.body.lastName).to.equal('Johnson');
           expect(res.body.email).to.equal('helen@nson.com');
           expect(res.body.role).to.equal('admin');
+          if (err) return done(err);
+          done();
         });
-      done();
     });
   });
 });
