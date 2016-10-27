@@ -4,9 +4,8 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "server.js",
   "scripts": {
-    "test:coverage": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "test": "mocha"
+    "test": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",

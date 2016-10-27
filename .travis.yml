@@ -6,6 +6,5 @@ before_script:
  - npm install -g mocha
 script:
   - npm run test
-  - npm run test:coverage
 after_success:
   - npm run coveralls
