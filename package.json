@@ -4,7 +4,9 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:coverage": "istanbul cover node_modules/mocha/bin/_mocha && rm -rf ./coverage",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,10 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.11.14",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.2",
+    "mocha-lcov-reporter": "^1.2.0",
     "supertest": "^2.0.0"
   }
 }
