@@ -1,4 +1,4 @@
-const documents = require('../models/documentsModel');
+const Document = require('../models/documentsModel');
 
 function handleError(res, reason, message, code) {
   console.log('ERROR:' + reason);
@@ -7,11 +7,23 @@ function handleError(res, reason, message, code) {
 
 let docControl = {
   getDocuments: function (req, res) {
-    res.send('Get all documents');
+    Document.findAll()
+      .then((documents) => {
+        res.json(documents);
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error fetching documents.');
+      });
   },
 
   getDocument: function (req, res) {
-    res.send('Get document');
+    Document.findById(req.params.id)
+      .then((document) => {
+        res.json(document);
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error fetching document.');
+      });
   },
 
   searchDocument: function (req, res) {
@@ -19,15 +31,40 @@ let docControl = {
   },
 
   createDocument: function (req, res) {
-    res.send('Create document');
+    Document.create(req.body)
+      .then((document) => {
+        res.send({
+          success: 'Document created successfully'
+        });
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error creating document.');
+      });
   },
 
   updateDocument: function (req, res) {
-    res.send('Update document');
+    Document.findOne({ id: req.params.id })
+      .then((document) => {
+        document.update(req.body);
+        res.send({
+          success: 'Document successfully updated.'
+        });
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error updating document.');
+      });
   },
 
   deleteDocument: function (req, res) {
-    res.send('Delete document');
+    Document.destroy({ where: { id: req.params.id } })
+      .then(() => {
+        res.send({
+          success: 'Document deleted.'
+        });
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error fetching document.');
+      });
   }
 }
 

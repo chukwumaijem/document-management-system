@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+
 let User = sequelize.define('user', {
   'firstName': {
     type: Sequelize.STRING,
@@ -21,11 +23,21 @@ let User = sequelize.define('user', {
     unique: true,
     notEmpty: true
   },
-  'hashedPassword': {
+  'password': {
     type: Sequelize.STRING,
     allowNull: false,
     notEmpty: true
+  },
+  'tokenKey': {
+    type: Sequelize.STRING,
+    allowNull: true,
+    notEmpty: false
   }
+});
+
+User.beforeCreate(function (user) {
+  let salt = bcrypt.genSaltSync(10);
+  user.password = bcrypt.hashSync(user.password, salt);
 });
 
 User.sync();
