@@ -2,7 +2,8 @@ let Role = sequelize.define('role', {
   'title': {
     type: Sequelize.STRING,
     allowNull: false,
-    notEmpty: true
+    notEmpty: true,
+    unique: true
   }
 });
 

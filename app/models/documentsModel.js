@@ -1,11 +1,11 @@
 let Document = sequelize.define('document', {
   'title': {
-    type: Sequelize.BLOB,
+    type: Sequelize.STRING,
     allowNull: false,
     notEmpty: true
   },
   'content': {
-    type: Sequelize.STRING,
+    type: Sequelize.TEXT,
     allowNull: false,
     notEmpty: true
   }
