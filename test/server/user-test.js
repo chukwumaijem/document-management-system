@@ -10,20 +10,21 @@ describe('User Tests', function () {
     lastName: 'Johnson',
     email: 'helen@nson.com',
     password: 'helenpass',
-    role: 'admin'
+    RoleId: 1
   };
 
   describe('Create user', function () {
 
     it('should validate that required user data is provided', function (done) {
-      api.post('/users').send(userOne)
+      api.post('/users').set()
+        .send(userOne)
         .end((err, res) => {
           expect(res.body).to.have.property('username');
           expect(res.body).to.have.property('firstName');
           expect(res.body).to.have.property('lastName');
           expect(res.body).to.have.property('email');
           expect(res.body).to.have.property('password');
-          expect(res.body).to.have.property('role');
+          expect(res.body).to.have.property('RoleId');
           if (err) return done(err);
           done();
         });
@@ -37,7 +38,7 @@ describe('User Tests', function () {
           expect(res.body.lastName).to.not.be.empty;
           expect(res.body.email).to.not.be.empty;
           expect(res.body.password).to.not.be.empty;
-          expect(res.body.role).to.not.be.empty;
+          expect(res.body.RoleId).to.not.be.empty;
           if (err) return done(err);
           done();
         });

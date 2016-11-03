@@ -1,4 +1,5 @@
-const Document = require('../models/documentsModel');
+const models = require('../models/dbconnect'),
+  jwt = require('jsonwebtoken');
 
 function handleError(res, reason, message, code) {
   console.log('ERROR:' + reason);
@@ -7,9 +8,23 @@ function handleError(res, reason, message, code) {
 
 let docControl = {
   getDocuments: function (req, res) {
-    Document.findAll()
+    models.Document.findAll({ include: [{ model: models.Role }, { model: models.User, as: 'owner' }] })
       .then((documents) => {
-        res.json(documents);
+        if (req.decoded && req.decoded.RoleId === 1) {
+          res.json(documents);
+          return;
+        }
+        res.send(
+          documents.filter((docs) => {
+            let match = false;
+            if (docs.public) {
+              match = true;
+            } else if (req.decoded && req.decoded.id === docs.ownerId) {
+              match = true;
+            }
+            return match ? docs : '';
+          })
+        );
       })
       .catch((err) => {
         handleError(res, err.message, 'Error fetching documents.');
@@ -17,9 +32,19 @@ let docControl = {
   },
 
   getDocument: function (req, res) {
-    Document.findById(req.params.id)
+    models.Document.findById(req.params.id, {
+        include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
+      })
       .then((document) => {
-        res.json(document);
+        if (req.decoded && req.decoded.RoleId === 1) {
+          res.json(document);
+        } else if (document.public) {
+          res.json(document);
+        } else if (req.decoded && document.ownerId === req.decoded.id) {
+          res.json(document);
+        } else {
+          res.send({ error: 'You do not have permission to view this document' });
+        }
       })
       .catch((err) => {
         handleError(res, err.message, 'Error fetching document.');
@@ -27,11 +52,18 @@ let docControl = {
   },
 
   searchDocument: function (req, res) {
+    const token = userDetail(getToken(req));
     res.send('Search document');
   },
 
   createDocument: function (req, res) {
-    Document.create(req.body)
+    const token = userDetail(getToken(req));
+    if (!token) {
+      res.send({ error: 'Only registered users can create documents.' });
+      return;
+    }
+    req.ownerId = token.id;
+    models.Document.create(req.body)
       .then((document) => {
         res.send({
           success: 'Document created successfully'
@@ -43,7 +75,12 @@ let docControl = {
   },
 
   updateDocument: function (req, res) {
-    Document.findOne({ id: req.params.id })
+    const token = userDetail(getToken(req));
+    models.Document.update(req.body, {
+        where: {
+          id: req.params.id
+        }
+      })
       .then((document) => {
         document.update(req.body);
         res.send({
@@ -56,7 +93,8 @@ let docControl = {
   },
 
   deleteDocument: function (req, res) {
-    Document.destroy({ where: { id: req.params.id } })
+    const token = userDetail(getToken(req));
+    models.Document.destroy({ where: { id: req.params.id } })
       .then(() => {
         res.send({
           success: 'Document deleted.'
