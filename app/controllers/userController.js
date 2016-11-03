@@ -1,4 +1,4 @@
-const User = require('../models/usersModel'),
+const models = require('../models/dbconnect'),
   jwt = require('jsonwebtoken');
 
 function handleError(res, reason, message, code) {
@@ -7,17 +7,20 @@ function handleError(res, reason, message, code) {
 };
 
 function createToken(userdata) {
-  let token = jwt.sign(userdata, process.env.secret, { expiresIn: 21000 });
+  let token = jwt.sign(userdata, process.env.secret, { expiresIn: 21600 });
   return token;
 };
 
-// function genTokenKey() {
-//   let text = "";
-//   let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function getToken(req) {
+  return req.body.token || req.query.token || req.headers['x-access-token'];
+}
 
-//   for (var i = 0; i < 5; i++)
-//     return text += possible.charAt(Math.floor(Math.random() * possible.length));
-// }
+function userDetail(token) {
+  return jwt.decode(token, process.env.secret, function (err, decoded) {
+    if (err) throw err;
+    return decoded;
+  });
+}
 
 let userControl = {
 
@@ -31,13 +34,13 @@ let userControl = {
       res.send({ Error: 'Password is required.' });
       return;
     }
-    User.findOne({ username: req.body.username })
+    models.User.findOne({ where: { username: req.body.username } })
       .then((user) => {
         if (user.password = req.body.password) {
-          user.update({ tokenKey });
+          let token = createToken({ id: user.id, username: user.username, RoleId: user.RoleId });
           res.send({
             message: 'Login successful.',
-            token: createToken({ username: user.username })
+            token
           });
         }
       }).catch((err) => {
@@ -47,9 +50,8 @@ let userControl = {
 
   // log out user control Should be fixed
   logoutUser: function (req, res) {
-    User.findOne({ username: req.body.username })
+    models.User.findOne({ where: { username: req.body.username } })
       .then((user) => {
-        user.update({ tokenKey: 'null' })
         res.send({ success: "User successfully logged out." })
       })
       .catch((err) => {
@@ -59,7 +61,13 @@ let userControl = {
 
   // get user control
   getUser: function (req, res) {
-    User.findOne({ id: req.params.id, attributes: ['id', 'firstName', 'lastName', 'username'] })
+    models.User.findOne({
+        id: req.params.id,
+        include: [{
+          model: models.Role
+        }],
+        // attributes: ['id', 'firstName', 'lastName', 'username', ]
+      })
       .then((user) => {
         res.json(user)
       })
@@ -70,7 +78,11 @@ let userControl = {
 
   // get users
   getUsers: function (req, res) {
-    User.findAll({ attributes: ['id', 'firstName', 'lastName', 'username'] })
+    models.User.findAll({
+        include: [{
+          model: models.Role
+        }]
+      })
       .then((users) => {
         res.json(users);
       })
@@ -80,7 +92,32 @@ let userControl = {
   },
 
   getDocuments: function (req, res) {
-    res.send('Get user documents');
+    const token = userDetail(getToken(req));
+    models.Document.findAll({
+        where: { ownerId: req.params.id },
+        include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
+      })
+      .then((document) => {
+        result = document.filter((doc) => {
+          if (doc.public) {
+            console.log('public');
+            return doc;
+          } else if (token && token.id === doc.ownerId) {
+            console.log('not public');
+            return doc;
+          }
+        });
+        if (document.length < 1) {
+          handleError(res, 'User have no documents.', 'User have no documents or User does not exist.');
+        } else if (result.length < 1) {
+          handleError(res, 'User have no public documents.', 'User have no public documents.');
+        } else {
+          res.send(result);
+        }
+      })
+      .catch((err) => {
+        handleError(res, err.message, 'Error getting user documents');
+      });
   },
 
   // create new user control
@@ -92,9 +129,9 @@ let userControl = {
       return;
     };
 
-    User.create(req.body)
+    models.User.create(req.body)
       .then((newUser) => {
-        let token = createToken({ username: newUser.username });
+        let token = createToken({ id: newUser.id, username: newUser.username, RoleId: user.RoleId });
         res.send({
           success: 'User created.',
           username: newUser.username,
@@ -107,11 +144,15 @@ let userControl = {
 
   // 
   updateUser: function (req, res) {
-    User.findOne({ id: req.params.id })
+    models.User.update(req.body, {
+        where: {
+          id: req.params.id
+        }
+      })
       .then((user) => {
-        user.update(req.body);
         res.send({
-          success: "User data updated."
+          success: "User data updated.",
+          user
         });
       })
       .catch((err) => {
@@ -120,7 +161,7 @@ let userControl = {
   },
 
   deleteUser: function (req, res) {
-    User.destroy({ where: { id: req.params.id } })
+    models.User.destroy({ where: { id: req.params.id } })
       .then((user) => {
         res.send({
           success: "User data deleted.",

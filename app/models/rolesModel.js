@@ -1,12 +1,11 @@
-let Role = sequelize.define('role', {
-  'title': {
-    type: Sequelize.STRING,
-    allowNull: false,
-    notEmpty: true,
-    unique: true
-  }
-});
-
-Role.sync();
-
-module.exports = Role;
+module.exports = function (sequelize, DataTypes) {
+  const Role = sequelize.define('Role', {
+    'title': {
+      type: DataTypes.STRING,
+      allowNull: false,
+      notEmpty: true,
+      unique: true
+    }
+  });
+  return Role;
+}

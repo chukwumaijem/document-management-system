@@ -1,20 +1,9 @@
-const express = require('express'),
-  bodyParser = require('body-parser');
-
-
 // set local env reader
 require('dotenv').config({ silent: true });
 
-global.Sequelize = require('sequelize');
-global.sequelize = new Sequelize(process.env.database, process.env.dbusername, process.env.dbpassword, {
-  host: 'localhost',
-  dialect: 'postgres',
-  pool: {
-    max: 5,
-    min: 0,
-    idle: 10000
-  }
-});
+const express = require('express'),
+  bodyParser = require('body-parser'),
+  models = require('./app/models/dbconnect');
 
 // import app routes
 const homeRoute = require('./app/routes/index'),
@@ -43,19 +32,13 @@ app.use(function (req, res) {
 
 //set app port
 let port = process.env.PORT;
-
-
-sequelize.authenticate()
-  .then(function () {
-    console.log('Database is connected...');
+models.sequelize.sync({ logging: false })
+  .then(() => {
     app.listen(port, (err) => {
       if (!err) {
         console.log(`App started on port: ${port}...`);
       };
     });
-  })
-  .catch(function (err) {
-    console.log('Unable to connect to database');
   });
 
 // export app for supertest testing
