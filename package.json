@@ -7,6 +7,7 @@
     "db-set": "dropdb documentManager && createdb documentManager && psql -f schema.sql documentManager",
     "seed": "npm run db-set && node runSeed.js",
     "test": "npm run seed && rm -rf coverage/ && istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec",
+    "start": "npm run seed && node server.js",
     "coveralls": "cat coverage/lcov.info | coveralls"
   },
   "repository": {
