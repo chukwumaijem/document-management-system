@@ -5,7 +5,7 @@ let authenticate = function (req, res, next) {
   if (token) {
     jwt.verify(token, process.env.secret, function (err, decoded) {
       if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });
+        return res.json({ success: false, message: err.message });
       } else {
         next();
       }

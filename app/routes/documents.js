@@ -8,13 +8,10 @@ const express = require('express'),
 documentRoutes.post('/', authenticate, userAccess, docControl.createDocument);
 
 // Find matching instances of document.
-documentRoutes.get('/',userAccess, docControl.getDocuments);
+documentRoutes.get('/', userAccess, docControl.getDocuments);
 
 // Find document.
 documentRoutes.get('/:id', userAccess, docControl.getDocument);
-
-// search through documents
-documentRoutes.get('/query', authenticate, userAccess, docControl.searchDocument);
 
 // Update document attributes.
 documentRoutes.put('/:id', authenticate, userAccess, docControl.updateDocument);

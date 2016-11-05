@@ -1,5 +1,7 @@
-const app = require('../../server');
-expect = require('chai').expect,
+'use strict';
+
+const app = require('../../server'),
+  expect = require('chai').expect,
   supertest = require('supertest'),
   api = supertest(app);
 
