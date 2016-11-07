@@ -4,7 +4,7 @@
   "description": "The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.",
   "main": "server.js",
   "scripts": {
-    "db-set": "psql -f schema.sql documentManager",
+    "db-set": "psql -f schema.sql travis_ci_test",
     "seed": "npm run db-set && node runSeed.js",
     "test": "npm run seed && rm -rf coverage/ && istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec",
     "start": "npm run seed && node server.js",
