@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express'),
   documentRoutes = express.Router(),
   docControl = require('../controllers/documentController'),

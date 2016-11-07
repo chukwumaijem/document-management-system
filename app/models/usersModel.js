@@ -35,6 +35,7 @@ module.exports = function (sequelize, Sequelize) {
         User.belongsTo(models.Role, {
           onDelete: "CASCADE",
           foreignKey: {
+            defaultValue: 2,
             allowNull: false
           }
         });

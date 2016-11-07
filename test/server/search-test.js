@@ -6,40 +6,62 @@ const app = require('../../server'),
   api = supertest(app);
 
 describe('Search documents', function () {
+  let adminToken, userToken;
+
+  before(function (done) {
+    api.post('/users/login').send({ username: 'ebuka', password: 'ebukaakubu' })
+      .expect(200).end((err, res) => {
+        adminToken = res.body.token;
+        done();
+      });
+  });
+
   it('should return documents that can be accessed only be a specified role', function (done) {
     api.get('/documents/query?limit=5&role=admin')
+      .set({ 'x-access-token': adminToken })
       .expect(200).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
         expect(res.body).to.have.lengthOf(1);
-        if (err) return done(err);
         done();
       });
   });
 
   it('should print appropriate message if document do not exist for a role', function (done) {
-    api.get('/documents/query?limit=5&role=reader')
-      .expect(200).end((err, res) => {
-        expect(res.body).to.have.property('message');
-        expect(res.body.message).to.equal('No document exists for this user.');
-        if (err) return done(err);
+    api.get('/documents/query?limit=5&role=Observer')
+      .set({ 'x-access-token': adminToken })
+      .expect(404).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('error');
+        expect(res.body.error).to.equal('No document matched the specified query.');
         done();
       });
   });
 
-  it('should return documents that were published ona certain date', function (done) {
-    api.get('/documents/query?limit=5&date=2016-10-17')
+  it('should return documents that were published on a certain date', function (done) {
+    api.get('/documents/query?limit=5&date=2016-11-07')
+      .set({ 'x-access-token': adminToken })
       .expect(200).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
         expect(res.body).to.have.lengthOf(5);
-        if (err) return done(err);
         done();
       });
   });
 
   it('should print appropriate message if document do not exist for a date', function (done) {
     api.get('/documents/query?limit=5&date=2016-10-01')
-      .expect(200).end((err, res) => {
-        expect(res.body).to.have.property('message');
-        expect(res.body.message).to.equal('No document was published on this date.');
-        if (err) return done(err);
+      .set({ 'x-access-token': adminToken })
+      .expect(404).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.property('error');
+        expect(res.body.error).to.equal('No document matched the specified query.');
         done();
       });
   });

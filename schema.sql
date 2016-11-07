@@ -16,7 +16,7 @@ CREATE TABLE public."users"
   password character varying(255) NOT NULL,
   createdAt timestamp with time zone NOT NULL,
   updatedAt timestamp with time zone NOT NULL,
-  roleId integer REFERENCES "roles" ON DELETE CASCADE
+  roleId integer REFERENCES "roles" ON DELETE CASCADE DEFAULT 2
 );
 
 CREATE TABLE public."documents"

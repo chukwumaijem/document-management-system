@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express'),
   userRoutes = express.Router(),
   userControl = require('../controllers/userController'),
@@ -14,10 +16,10 @@ userRoutes.post('/logout', authenticate, userControl.logoutUser);
 userRoutes.post('/', userControl.createUser);
 
 // Find users.
-userRoutes.get('/', authenticate, userControl.getUsers);
+userRoutes.get('/', authenticate, userAccess, userControl.getUsers);
 
 // Find a user.
-userRoutes.get('/:id', authenticate, userControl.getUser);
+userRoutes.get('/:id', authenticate, userAccess, userControl.getUser);
 
 // Find all documents belonging to the user
 userRoutes.get('/:id/documents', userAccess, userControl.getDocuments);

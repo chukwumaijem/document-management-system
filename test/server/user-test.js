@@ -1,7 +1,10 @@
+'use strict';
+
 const app = require('../../server'),
   expect = require('chai').expect,
   supertest = require('supertest'),
-  api = supertest(app);
+  api = supertest(app),
+  bcrypt = require('bcryptjs');
 
 describe('User Tests', function () {
   let userOne = {
@@ -9,71 +12,105 @@ describe('User Tests', function () {
     firstName: 'Helena',
     lastName: 'Johnson',
     email: 'helen@nson.com',
-    password: 'helenpass',
-    RoleId: 1
+    password: 'helenpass'
   };
+  let adminToken, userToken;
+
+  describe('Login User', function () {
+    it('should login in a registered user.', function (done) {
+      api.post('/users/login').send({ username: 'ebuka', password: 'ebukaakubu' })
+        .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('success');
+          expect(res.body).to.have.property('token');
+
+          expect(res.body.success).to.equal('Login successful.');
+          adminToken = res.body.token;
+          done();
+        });
+    });
+
+    it('should throw error if username is not provided', function (done) {
+      api.post('/users/login').send({ password: 'ebukaakubu' })
+        .expect(400).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('Username is required.');
+          done();
+        });
+    });
+
+    it('should throw error if password is not provided', function (done) {
+      api.post('/users/login').send({ username: 'ebuka' })
+        .expect(400).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('Password is required.');
+          done();
+        });
+    });
+  });
 
   describe('Create user', function () {
-
+    let resData, errData;
     it('should validate that required user data is provided', function (done) {
-      api.post('/users').set()
+      api.post('/users')
         .send(userOne)
-        .end((err, res) => {
+        .expect(201).end((err, res) => {
+          resData = res;
+          errData = err;
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('username');
           expect(res.body).to.have.property('firstName');
           expect(res.body).to.have.property('lastName');
           expect(res.body).to.have.property('email');
           expect(res.body).to.have.property('password');
-          expect(res.body).to.have.property('RoleId');
-          if (err) return done(err);
           done();
         });
     });
 
-    it('should validate that provied user data is valid', function (done) {
-      api.post('/users').send(userOne)
-        .end((err, res) => {
-          expect(res.body.username).to.not.be.empty;
-          expect(res.body.firstName).to.not.be.empty;
-          expect(res.body.lastName).to.not.be.empty;
-          expect(res.body.email).to.not.be.empty;
-          expect(res.body.password).to.not.be.empty;
-          expect(res.body.RoleId).to.not.be.empty;
-          if (err) return done(err);
-          done();
-        });
+    it('should validate that provided user data is valid', function (done) {
+      if (errData) {
+        return done(errData);
+      }
+      expect(resData.body.username).to.not.be.empty;
+      expect(resData.body.firstName).to.not.be.empty;
+      expect(resData.body.lastName).to.not.be.empty;
+      expect(resData.body.email).to.not.be.empty;
+      expect(resData.body.password).to.not.be.empty;
+      expect(bcrypt.compareSync(userOne.password, resData.body.password)).to.be.true;
+      expect(resData.body.RoleId).to.not.be.empty;
+      done();
     });
 
     it('should add a new user to the database', function (done) {
-      api.post('/users').send(userOne)
-        .expect(201).end((err, res) => {
-          expect(res.body).to.have.property('id');
-          expect(res.body).to.have.property('username');
-          expect(res.body).to.have.property('firstName');
-          expect(res.body).to.have.property('lastName');
-          expect(res.body).to.have.property('email');
-          expect(res.body).to.have.property('password');
-          expect(res.body).to.have.property('role');
-          expect(res.body).to.have.property('token');
-
-          expect(res.body.username).to.equal(userOne.username);
-          expect(res.body.firstName).to.equal(userOne.firstName);
-          expect(res.body.lastName).to.equal(userOne.lastName);
-          expect(res.body.email).to.equal(userOne.email);
-          expect(res.body.password).to.equal(userOne.password);
-          expect(res.body.role).to.have.property(userOne.role);
-          expect(res.body.token).to.not.be.empty;
-          if (err) return done(err);
+      api.get('/users')
+        .set({ 'x-access-token': adminToken })
+        .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.lengthOf(5);
           done();
         });
     });
 
     it('should validate that a new user created is unique', function (done) {
       api.post('/users').send(userOne)
-        .expect(400).end((err, res) => {
+        .expect(409).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('error');
-          expect(res.body.error).to.be('User already exist.');
-          if (err) return done(err);
+          expect(res.body.error).to.equal('User already exist.');
           done();
         });
     });
@@ -84,16 +121,17 @@ describe('User Tests', function () {
         firstName: 'Henry',
         lastName: 'Joon',
         email: 'henry@nson.com',
-        password: 'henrypass',
-        role: 'member'
+        password: 'henrypass'
       };
 
       api.post('/users').send(userTwo)
         .expect(201).end((err, res) => {
-          expect(res.body).to.have.property('role');
-          expect(res.body.role).to.not.be.empty;
-          expect(res.body.role).to.equal(userTwo.role);
-          if (err) return done(err);
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('RoleId');
+          expect(res.body.RoleId).to.not.be.empty;
+          expect(res.body.RoleId).to.equal(2);
           done();
         });
     });
@@ -104,17 +142,18 @@ describe('User Tests', function () {
         firstName: 'Alice',
         lastName: 'Wonderland',
         email: 'alice@nson.com',
-        password: 'alicepass',
-        role: 'editor'
+        password: 'alicepass'
       };
 
       api.post('/users').send(userThree)
         .expect(201).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('firstName');
           expect(res.body).to.have.property('lastName');
           expect(res.body.firstName).to.equal(userThree.firstName);
           expect(res.body.lastName).to.equal(userThree.lastName);
-          if (err) return done(err);
           done();
         });
     });
@@ -122,31 +161,34 @@ describe('User Tests', function () {
 
   describe('Get users', function () {
     it('should return all users if no user-id is specified', function (done) {
-      api.get('/users').send(userOne)
+      api.get('/users').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
-          expect(res.body).to.have.lengthOf(8);
-          if (err) return done(err);
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.lengthOf(7);
           done();
         });
     });
 
     it('should return the user with the specified user-id', function (done) {
-      api.get('/users/6').send(userOne)
+      api.get('/users/5').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('id');
           expect(res.body).to.have.property('username');
           expect(res.body).to.have.property('firstName');
           expect(res.body).to.have.property('lastName');
           expect(res.body).to.have.property('email');
-          expect(res.body).to.have.property('role');
 
-          expect(res.body.id).to.equal(6);
+          expect(res.body.id).to.equal(5);
           expect(res.body.username).to.equal('helen');
           expect(res.body.firstName).to.equal('Helena');
           expect(res.body.lastName).to.equal('Johnson');
           expect(res.body.email).to.equal('helen@nson.com');
-          expect(res.body.role).to.equal('admin');
-          if (err) return done(err);
+          expect(res.body.RoleId).to.equal(2);
           done();
         });
     });

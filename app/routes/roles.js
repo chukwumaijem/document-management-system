@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express'),
   roleControl = require('../controllers/roleController'),
   roleRoutes = express.Router(),

@@ -1,3 +1,5 @@
+'use strict';
+
 const models = require('../models/dbconnect'),
   jwt = require('jsonwebtoken'),
   bcrypt = require('bcryptjs');
@@ -8,42 +10,33 @@ function handleError(res, reason, message, code) {
 };
 
 function createToken(userdata) {
-  const token = jwt.sign(userdata, process.env.secret, { expiresIn: 21600 });
+  const token = jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
   return token;
 };
-
-function getToken(req) {
-  return req.body.token || req.query.token || req.headers['x-access-token'];
-}
-
-function userDetail(token) {
-  return jwt.decode(token, process.env.secret, function (err, decoded) {
-    if (err) throw err;
-    return decoded;
-  });
-}
 
 let userControl = {
 
   // login user control
   loginUser: function (req, res) {
     if (!req.body.username) {
-      res.send({ error: 'Username is required.' });
+      res.status(400)
+        .send({ error: 'Username is required.' });
       return;
     }
     if (!req.body.password) {
-      res.send({ error: 'Password is required.' });
+      res.status(400)
+        .send({ error: 'Password is required.' });
       return;
     }
     models.User.findOne({ where: { username: req.body.username } })
       .then((user) => {
         if (bcrypt.compareSync(req.body.password, user.password)) {
-          console.log('Hola');
           const token = createToken({ id: user.id, username: user.username, RoleId: user.RoleId });
-          res.send({
-            success: 'Login successful.',
-            token
-          });
+          res.status(200)
+            .send({
+              success: 'Login successful.',
+              token
+            });
         }
       }).catch((err) => {
         handleError(res, err.message, 'Login failed. Username or password invalid.', 404);
@@ -90,18 +83,17 @@ let userControl = {
         res.json(users);
       })
       .catch((err) => {
-        handleError(res, err.message, 'Error getting users');
+        handleError(res, err, 'Error getting users');
       });
   },
 
   getDocuments: function (req, res) {
-    const token = userDetail(getToken(req));
     models.Document.findAll({
         where: { ownerId: req.params.id },
         include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
       })
       .then((document) => {
-        result = document.filter((doc) => {
+        let result = document.filter((doc) => {
           if (doc.public) {
             return doc;
           } else if ((req.decoded && req.decoded.id === doc.ownerId) ||
@@ -110,9 +102,11 @@ let userControl = {
           }
         });
         if (document.length < 1) {
-          handleError(res, 'User have no documents.', 'No documents found for this user.');
+          handleError(res, 'User have no documents.',
+            'No documents found for this user.');
         } else if (result.length < 1) {
-          handleError(res, 'User have no public documents.', 'User have no public documents.');
+          handleError(res, 'User have no public documents.',
+            'User have no public documents.');
         } else {
           res.send(result);
         }
@@ -124,7 +118,8 @@ let userControl = {
 
   // create new user control
   createUser: function (req, res) {
-    if (!req.body.username || !req.body.firstName || !req.body.lastName || !req.body.email || !req.body.password) {
+    if (!req.body.username || !req.body.firstName ||
+      !req.body.lastName || !req.body.email || !req.body.password) {
       res.send({
         Error: 'User data incomplete.'
       });
@@ -133,14 +128,16 @@ let userControl = {
 
     models.User.create(req.body)
       .then((newUser) => {
-        let token = createToken({ id: newUser.id, username: newUser.username, RoleId: newUser.RoleId });
-        res.send({
-          success: 'User created.',
+        let token = createToken({
+          id: newUser.id,
           username: newUser.username,
-          token
+          RoleId: newUser.RoleId
         });
+        newUser.token = token;
+        newUser.success = 'User created.';
+        res.status(201).json(newUser);
       }).catch((err) => {
-        handleError(res, err.message, 'User already exist.');
+        handleError(res, err.message, 'User already exist.', 409);
       });
   },
 

@@ -1,3 +1,5 @@
+'use strict';
+
 const roleData = [
     { title: 'Admin' },
     { title: 'User' }
@@ -23,12 +25,9 @@ module.exports = function (models) {
 
   models.Role.bulkCreate(roleData)
     .then(function () {
-      console.log('User start');
       models.User.bulkCreate(userData, { individualHooks: true })
         .then(function () {
-          console.log('Document start');
           models.Document.bulkCreate(documentData);
-          console.log('Document finished');
         }).catch((err) => {
           console.log(err.message);
         })

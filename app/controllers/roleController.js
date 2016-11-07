@@ -1,3 +1,5 @@
+'use strict';
+
 const models = require('../models/dbconnect');
 
 function handleError(res, reason, message, code) {
@@ -9,12 +11,13 @@ const roleControl = {
   createRole: function (req, res) {
     models.Role.create(req.body)
       .then((role) => {
-        res.send({
-          success: "Role created"
-        });
+        res.status(201)
+          .send({
+            success: "New role created successfully."
+          });
       })
       .catch((err) => {
-        handleError(res, err.message, 'Role cannot be created.');
+        handleError(res, err.message, 'Role already exists.', 409);
       });
   },
 
@@ -29,16 +32,23 @@ const roleControl = {
   },
 
   updateRole: function (req, res) {
-    models.Role.update(req.body, {
+    models.Role.findOne({
         where: {
           id: req.params.id
         }
       })
       .then((role) => {
-        res.send({
-          success: 'Role updated successfully',
-          title: role.title
-        });
+        if (!role) {
+          res.status(400)
+            .send({ error: 'Role does not exist.' });
+          return;
+        }
+        role.update(req.body);
+        res.status(200)
+          .send({
+            success: 'Role updated successfully.',
+            title: role.title
+          });
       })
       .catch((err) => {
         handleError(res, err.message, 'Role cannot be updated.');
@@ -46,14 +56,20 @@ const roleControl = {
   },
 
   deleteRole: function (req, res) {
-    models.Role.destroy({ where: { id: req.params.id } })
-      .then(() => {
+    models.Role.findOne({ where: { id: req.params.id } })
+      .then((role) => {
+        if (!role) {
+          res.status(400)
+            .send({ error: 'Role does not exist.' });
+          return;
+        }
+        role.destroy();
         res.send({
-          success: 'Role has been deleted.'
+          success: 'Role was deleted successfully.'
         });
       })
       .catch((err) => {
-        handleError(res, err.message, 'Role cannot be created.');
+        handleError(res, err.message, 'Role cannot be deleted.');
       });
   }
 }

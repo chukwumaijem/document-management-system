@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require("fs"),
   path = require("path"),
   Sequelize = require('sequelize'),
@@ -8,7 +10,8 @@ const fs = require("fs"),
       max: 5,
       min: 0,
       idle: 10000
-    }
+    },
+    logging: false
   });
 
 var db = {};

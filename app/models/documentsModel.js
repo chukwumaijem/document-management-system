@@ -31,7 +31,10 @@ module.exports = function (sequelize, Sequelize) {
           }
         });
       }
-    }
+    },
+    // timestamps: true,
+    // createdAt: 'publishedDate',
+    // updatedAt: 'updateDate'
   });
   return Document;
 }

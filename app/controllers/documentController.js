@@ -55,7 +55,8 @@ let docControl = {
     models.Document.findAll({
         include: [{ model: models.Role },
           { model: models.User, as: 'owner' }
-        ]
+        ],
+        order: '"createdAt" DESC'
       })
       .then((documents) => {
         res.send(filterDocs(req, documents));
@@ -69,10 +70,22 @@ let docControl = {
     models.Document.findAll({
         include: [{ model: models.Role },
           { model: models.User, as: 'owner' }
-        ]
+        ],
+        order: '"createdAt" DESC',
+        offset: req.query.start || 0
       })
       .then((documents) => {
-        res.send(filterSearch(req.query, filterDocs(req, documents)));
+        const result = filterSearch(req.query, filterDocs(req, documents));
+        if (documents && documents.length > 1 && result.length < 1) {
+          res.status(404)
+            .send({ error: 'No document matched the specified query.' });
+          return;
+        } else if (!documents) {
+          res.status(404)
+            .send({ error: 'No documents found.' });
+          return;
+        }
+        res.send(result);
       })
       .catch((err) => {
         handleError(res, err.message, 'Error fetching documents.');
@@ -112,9 +125,8 @@ let docControl = {
     req.ownerId = req.decoded.id;
     models.Document.create(req.body)
       .then((document) => {
-        res.send({
-          success: 'Document created successfully'
-        });
+        res.status(201)
+          .send(document);
       })
       .catch((err) => {
         handleError(res, err.message, 'Error creating document.');
