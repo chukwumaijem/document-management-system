@@ -5,7 +5,7 @@ node_js:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database documentManager;' -U postgres
+  - psql -c 'create database travis_ci_test;' -U postgres
 script:
   - npm run test
 after_success:
