@@ -1,3 +1,5 @@
+'use strict';
+
 // set local env reader
 require('dotenv').config({ silent: true });
 
@@ -31,13 +33,13 @@ app.use(function (req, res) {
 });
 
 //set app port
-let port = process.env.PORT;
+const port = process.env.PORT || 3000;
 models.sequelize.sync({ logging: false })
   .then(() => {
     app.listen(port, (err) => {
       if (!err) {
         console.log(`App started on port: ${port}...`);
-      };
+      }
     });
   });
 
