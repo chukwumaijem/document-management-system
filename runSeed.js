@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config({ silent: true });
 const models = require('./app/models/dbconnect');
 

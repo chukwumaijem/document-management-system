@@ -42,7 +42,7 @@ describe('Search documents', function () {
   });
 
   it('should return documents that were published on a certain date', function (done) {
-    api.get('/documents/query?limit=5&date=2016-11-07')
+    api.get('/documents/query?limit=5&date=' + new Date().toISOString().substr(0, 10))
       .set({ 'x-access-token': adminToken })
       .expect(200).end((err, res) => {
         if (err) {
