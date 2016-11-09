@@ -13,6 +13,7 @@ How to Use
 To make use of this API, first create a clone by running the following command
 
 git clone https://github.com/aezumezu/document-management-system.git
+
 Next, you will need to create a .env file to store the environment variables in the root directory of the app. Your .env file must conform to the pattern shown below.
 
 database = *****the name of your database******
