@@ -12,7 +12,7 @@ How to Use
 
 To make use of this API, first create a clone by running the following command
 
-git clone https://github.com/bolorundurowb/Document-Management-System.git
+git clone https://github.com/aezumezu/document-management-system.git
 Next, you will need to create a .env file to store the environment variables in the root directory of the app. Your .env file must conform to the pattern shown below.
 
 database = *****the name of your database******
@@ -27,8 +27,8 @@ Run *_npm start_* to seed the database and start the app
 A tool such as Postman can be used to access the end points. JSON data may need to be sent to the server endpoints. The table below shows a comprehensive breakdown of the endpoints that this API exposes.
 
 
-|EndPoint | Functionality | Requires Authentication| Access Level |
-|---|:---|---:|
+EndPoint  |  Functionality | Requires Authentication | Access Level
+------------  |  ----------------- | -------------------------------- | ------------------
 | POST /users/login	| Logs a user in.	| No | All |
 | POST /users/ |	Creates a new user. |	No | All|
 | GET /users/ |	Find matching instances of user. |	Yes | Admin
