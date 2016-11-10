@@ -12,6 +12,10 @@ describe('Search documents', function () {
     api.post('/users/login').send({ username: 'ebuka', password: 'ebukaakubu' })
       .expect(200).end((err, res) => {
         adminToken = res.body.token;
+      });
+    api.post('/users/login').send({ username: 'adaobi', password: 'mmaduada' })
+      .expect(200).end((err, res) => {
+        userToken = res.body.token;
         done();
       });
   });
@@ -65,4 +69,40 @@ describe('Search documents', function () {
         done();
       });
   });
+
+  it('should return only public documents to guests', function (done) {
+    api.get('/documents/query?date='+ new Date().toISOString().substr(0, 10))
+      .expect(200).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.lengthOf(2);
+        done();
+      });
+  });
+
+  it('should show users their private documents and public documents', function (done) {
+    api.get('/documents/query?date='+ new Date().toISOString().substr(0, 10))
+      .set({ 'x-access-token': userToken })
+      .expect(200).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.lengthOf(4);
+        done();
+      });
+  });
+
+  it('should return all documents to admins', function (done) {
+    api.get('/documents/query?date='+ new Date().toISOString().substr(0, 10))
+      .set({ 'x-access-token': adminToken })
+      .expect(200).end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.body).to.have.lengthOf(9);
+        done();
+      });
+  });
+
 });
