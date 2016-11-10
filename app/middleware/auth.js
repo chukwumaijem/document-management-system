@@ -9,13 +9,13 @@ let authenticate = function (req, res, next) {
       if (err) {
         return res.json({ success: false, message: err.message });
       } else {
+        req.decoded = decoded;
         next();
       }
     });
   } else {
     return res.status(401).send({
-      success: false,
-      message: 'No token provided.'
+      error: 'No token provided.'
     });
   }
 };
