@@ -16,7 +16,7 @@ function filterDocs(req, documents) {
     if (docs.public) {
       match = true;
     } else if (req.decoded && (req.decoded.id === 1 ||
-        req.decoded.id === docs.ownerId)) {
+      req.decoded.id === docs.ownerId)) {
       match = true;
     }
     return match ? docs : '';
@@ -53,43 +53,39 @@ function filterSearch(query, documents) {
 let docControl = {
   getDocuments: function (req, res) {
     models.Document.findAll({
-        include: [{ model: models.Role },
-          { model: models.User, as: 'owner' }
-        ],
-        order: '"createdAt" DESC'
-      })
-      .then((documents) => {
-        res.send(filterDocs(req, documents));
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error fetching documents.');
-      });
+      include: [{ model: models.Role },
+      { model: models.User, as: 'owner' }
+      ],
+      order: '"createdAt" DESC'
+    }).then((documents) => {
+      res.send(filterDocs(req, documents));
+    }).catch((err) => {
+      handleError(res, err.message, 'Error fetching documents.');
+    });
   },
 
   searchDocument: function (req, res) {
     models.Document.findAll({
-        include: [{ model: models.Role },
-          { model: models.User, as: 'owner' }
-        ],
-        order: '"createdAt" DESC',
-        offset: req.query.start || 0
-      })
-      .then((documents) => {
-        const result = filterSearch(req.query, filterDocs(req, documents));
-        if (documents && documents.length > 1 && result.length < 1) {
-          res.status(404)
-            .send({ error: 'No document matched the specified query.' });
-          return;
-        } else if (!documents) {
-          res.status(404)
-            .send({ error: 'No documents found.' });
-          return;
-        }
-        res.send(result);
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error fetching documents.');
-      });
+      include: [{ model: models.Role },
+      { model: models.User, as: 'owner' }
+      ],
+      order: '"createdAt" DESC',
+      offset: req.query.start || 0
+    }).then((documents) => {
+      const result = filterSearch(req.query, filterDocs(req, documents));
+      if (documents && documents.length > 1 && result.length < 1) {
+        res.status(404)
+          .send({ error: 'No document matched the specified query.' });
+        return;
+      } else if (!documents) {
+        res.status(404)
+          .send({ error: 'No documents found.' });
+        return;
+      }
+      res.send(result);
+    }).catch((err) => {
+      handleError(res, err.message, 'Error fetching documents.');
+    });
   },
 
   getDocument: function (req, res) {
@@ -97,24 +93,23 @@ let docControl = {
       return docControl.searchDocument(req, res);
     }
     models.Document.findById(req.params.id, {
-        include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
-      })
-      .then((document) => {
-        if (!document) {
-          res.send({ error: "Document not found." });
-          return
-        }
-        const result = filterDocs(req, document);
-        if (!result.length) {
-          res.send({ error: "You do not have permission to view this document." });
-          return;
-        } else {
-          res.send(result);
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error fetching document.');
-      });
+      include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
+    }).then((document) => {
+      if (!document) {
+        res.send({ error: 'Document not found.' });
+        return
+      }
+      const result = filterDocs(req, document);
+      if (!result.length) {
+        res.status(401)
+          .send({ error: 'You do not have permission to view this document.' });
+        return;
+      } else {
+        res.send(result);
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Error fetching document.');
+    });
   },
 
   createDocument: function (req, res) {
@@ -123,14 +118,12 @@ let docControl = {
       return;
     }
     req.ownerId = req.decoded.id;
-    models.Document.create(req.body)
-      .then((document) => {
-        res.status(201)
-          .send(document);
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error creating document.');
-      });
+    models.Document.create(req.body).then((document) => {
+      res.status(201)
+        .send(document);
+    }).catch((err) => {
+      handleError(res, err.message, 'Error creating document.');
+    });
   },
 
   updateDocument: function (req, res) {
@@ -138,23 +131,21 @@ let docControl = {
       res.send({ error: "You are not logged in." });
       return;
     }
-    models.Document.findOne(req.body, {
-        where: { id: req.params.id }
-      })
-      .then((document) => {
-        if (document.ownerId === req.decoded.id || req.decoded.RoleId === 1) {
-          document.update(req.body);
-          res.send({
-            success: 'Document successfully updated.'
-          });
-          return;
-        } else {
-          res.send({ error: "You do not have permission to update this document." });
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error updating document.');
-      });
+    models.Document.findOne({
+      where: { id: req.params.id }
+    }).then((document) => {
+      if (document.ownerId === req.decoded.id || req.decoded.RoleId === 1) {
+        document.update(req.body);
+        res.status(200).send({
+          success: 'Document successfully updated.'
+        });
+      } else {
+        res.status(401)
+          .send({ error: "You do not have permission to update this document." });
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Error updating document.');
+    });
   },
 
   deleteDocument: function (req, res) {
@@ -163,22 +154,20 @@ let docControl = {
       return;
     }
     models.Document.findOne({
-        where: { id: req.params.id }
-      })
-      .then((document) => {
-        if (document.ownerId === req.decoded.id || req.decoded.RoleId === 1) {
-          document.destroy();
-          res.send({
-            success: 'Document deleted.'
-          });
-          return;
-        } else {
-          res.send({ error: "You do not have permission to delete this document." });
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error deleting document.');
-      });
+      where: { id: req.params.id }
+    }).then((document) => {
+      if (document.ownerId === req.decoded.id || req.decoded.RoleId === 1) {
+        document.destroy();
+        res.status(200).send({
+          success: 'Document deleted.'
+        });
+      } else {
+        res.status(401)
+          .send({ error: "You do not have permission to delete this document." });
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Error deleting document.');
+    });
   }
 }
 

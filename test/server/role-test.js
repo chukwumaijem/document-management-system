@@ -1,17 +1,23 @@
 'use strict';
 
-const app = require('../../server.js'),
-  expect = require('chai').expect,
-  supertest = require('supertest'),
-  api = supertest(app);
+const app = require('../../server.js');
+const expect = require('chai').expect;
+const supertest = require('supertest');
+const api = supertest(app);
 
 describe('Role Tests', function () {
   let adminToken, userToken;
 
   before(function (done) {
-    api.post('/users/login').send({ username: 'ebuka', password: 'ebukaakubu' })
+    api.post('/users/login')
+      .send({ username: 'ebuka', password: 'ebukaakubu' })
       .expect(200).end((err, res) => {
         adminToken = res.body.token;
+      });
+    api.post('/users/login')
+      .send({ username: 'adaobi', password: 'mmaduada' })
+      .expect(200).end((err, res) => {
+        userToken = res.body.token;
         done();
       });
   });
@@ -42,6 +48,28 @@ describe('Role Tests', function () {
           done();
         });
     });
+
+    it('should return error for non-admin users', function (done) {
+      api.post('/roles').set({ 'x-access-token': userToken })
+        .send({ title: 'Member' })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('You do not have permission.');
+        });
+
+      api.post('/roles').send({ title: 'Member' })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('No token provided.');
+          done();
+        });
+    });
   });
 
   describe('Get Role', function () {
@@ -56,6 +84,28 @@ describe('Role Tests', function () {
           done();
         });
     });
+
+
+    it('should return error for non-admin users', function (done) {
+      api.get('/roles').set({ 'x-access-token': userToken })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('You do not have permission.');
+        });
+
+      api.get('/roles')
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('No token provided.');
+          done();
+        });
+    });
   });
 
   describe('Update role', function () {
@@ -63,9 +113,11 @@ describe('Role Tests', function () {
       api.put('/roles/2').set({ 'x-access-token': adminToken })
         .send({ title: 'Reader' })
         .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('success');
           expect(res.body.success).to.equal('Role updated successfully.');
-          if (err) return done(err);
           done();
         });
     });
@@ -74,9 +126,34 @@ describe('Role Tests', function () {
       api.put('/roles/4').set({ 'x-access-token': adminToken })
         .send({ title: 'Newbie' })
         .expect(400).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('error');
           expect(res.body.error).to.equal('Role does not exist.');
-          if (err) return done(err);
+          done();
+        });
+    });
+
+
+    it('should return error for non-admin users', function (done) {
+      api.put('/roles/2').set({ 'x-access-token': userToken })
+        .send({ title: 'Member' })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('You do not have permission.');
+        });
+
+      api.put('/roles/2').send({ title: 'Member' })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('No token provided.');
           done();
         });
     });
@@ -86,9 +163,11 @@ describe('Role Tests', function () {
     it('should delete existing roles', function (done) {
       api.delete('/roles/3').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('success');
           expect(res.body.success).to.equal('Role was deleted successfully.');
-          if (err) return done(err);
           done();
         });
     });
@@ -96,11 +175,34 @@ describe('Role Tests', function () {
     it('should return approprite message for roles that do not exist', function (done) {
       api.delete('/roles/4').set({ 'x-access-token': adminToken })
         .expect(400).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.have.property('error');
           expect(res.body.error).to.equal('Role does not exist.');
-          if (err) return done(err);
           done();
         });
     });
-  })
+
+    it('should return error for non-admin users', function (done) {
+      api.delete('/roles/3').set({ 'x-access-token': userToken })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('You do not have permission.');
+        });
+
+      api.delete('/roles/3')
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('No token provided.');
+          done();
+        });
+    });
+  });
 });
