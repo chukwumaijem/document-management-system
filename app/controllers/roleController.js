@@ -33,23 +33,22 @@ const roleControl = {
 
   updateRole: function (req, res) {
     models.Role.findOne({
-        where: {
-          id: req.params.id
-        }
-      })
-      .then((role) => {
-        if (!role) {
-          res.status(400)
-            .send({ error: 'Role does not exist.' });
-          return;
-        }
-        role.update(req.body);
-        res.status(200)
-          .send({
-            success: 'Role updated successfully.',
-            title: role.title
-          });
-      })
+      where: {
+        id: req.params.id
+      }
+    }).then((role) => {
+      if (!role) {
+        res.status(400)
+          .send({ error: 'Role does not exist.' });
+        return;
+      }
+      role.update(req.body);
+      res.status(200)
+        .send({
+          success: 'Role updated successfully.',
+          title: role.title
+        });
+    })
       .catch((err) => {
         handleError(res, err.message, 'Role cannot be updated.');
       });
