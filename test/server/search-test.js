@@ -88,9 +88,7 @@ describe('Search documents', function () {
         if (err) {
           return done(err);
         }
-        // console.log(res.body);
         expect(res.body).to.have.lengthOf(4);
-        console.log(res.body);
         done();
       });
   });
