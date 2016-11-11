@@ -16,11 +16,11 @@ git clone https://github.com/aezumezu/document-management-system.git
 
 Next, you will need to create a .env file to store the environment variables in the root directory of the app. Your .env file must conform to the pattern shown below.
 
-database = *_the name of your database_*  
-secret = *_secret key to use in the app_*  
-dbusername = *_your database username_*   
-dbpassword = *_your database password_*   
-PORT = *_port to start the app. If ommited, default port 3000 will be used_*   
+database = ***_the name of your database_***  
+secret = ***_secret key to use in the app_***  
+dbusername = ***_your database username_***   
+dbpassword = ***_your database password_***   
+PORT = ***_port to start the app. If ommited, default port 3000 will be used_***   
 
 
 Run *_npm install_* to install app dependencies
