@@ -3,7 +3,7 @@
 const models = require('../models/dbconnect');
 
 function handleError(res, reason, message, code) {
-  console.log('ERROR:' + reason);
+  console.log('error:' + reason);
   res.status(code || 500).json({ 'error': message });
 }
 
@@ -11,28 +11,24 @@ function filterDocs(req, documents) {
   if (!Array.isArray(documents)) {
     documents = [documents];
   }
-  return documents.filter((docs) => {
-    let match = false;
-    if (docs.public) {
-      match = true;
-    } else if (req.decoded && (req.decoded.id === 1 ||
-      req.decoded.id === docs.ownerId)) {
-      match = true;
-    }
-    return match ? docs : '';
-  })
+  return documents.filter((document) => {
+    const isPublic = document.public;
+    const isAdmin = req.decoded && req.decoded.id === 1;
+    const isOwner = req.decoded && req.decoded.id === document.ownerId;
+
+    return isPublic || isAdmin || isOwner;
+  });
 }
 
 function dateFilter(date, documents) {
   return documents.filter((document) => {
-    return (date === JSON.stringify(document.createdAt).substr(1, 10)) ? document : '';
+    return date === JSON.stringify(document.createdAt).substr(1, 10);
   });
 }
 
 function roleFilter(role, documents) {
   return documents.filter((document) => {
-    return (role.toLowerCase() === document.Role.title.toLowerCase()) ?
-      document : '';
+    return role.toLowerCase() === document.Role.title.toLowerCase();
   });
 }
 
@@ -50,13 +46,28 @@ function filterSearch(query, documents) {
   return documents;
 }
 
-let docControl = {
-  getDocuments: function (req, res) {
+function searchDocument(req, res) {
+  models.Document.findAll({
+    include: [{ model: models.Role },
+    { model: models.User, as: 'owner' }
+    ],
+    order: '"createdAt" DESC',
+    offset: req.query.start || 0
+  }).then((documents) => {
+    res.send(filterSearch(req.query, filterDocs(req, documents)));
+  }).catch((err) => {
+    handleError(res, err.message, 'Error fetching documents.');
+  });
+}
+
+module.exports = {
+  getDocuments(req, res) {
     models.Document.findAll({
       include: [{ model: models.Role },
       { model: models.User, as: 'owner' }
       ],
       order: '"createdAt" DESC'
+      // order: [['createdAt', 'DESC'], ['title', 'DESC']]
     }).then((documents) => {
       res.send(filterDocs(req, documents));
     }).catch((err) => {
@@ -64,46 +75,21 @@ let docControl = {
     });
   },
 
-  searchDocument: function (req, res) {
-    models.Document.findAll({
-      include: [{ model: models.Role },
-      { model: models.User, as: 'owner' }
-      ],
-      order: '"createdAt" DESC',
-      offset: req.query.start || 0
-    }).then((documents) => {
-      const result = filterSearch(req.query, filterDocs(req, documents));
-      if (documents && documents.length > 1 && result.length < 1) {
-        res.status(404)
-          .send({ error: 'No document matched the specified query.' });
-        return;
-      } else if (!documents) {
-        res.status(404)
-          .send({ error: 'No documents found.' });
-        return;
-      }
-      res.send(result);
-    }).catch((err) => {
-      handleError(res, err.message, 'Error fetching documents.');
-    });
-  },
-
-  getDocument: function (req, res) {
+  getDocument(req, res) {
     if (Object.keys(req.query).length) {
-      return docControl.searchDocument(req, res);
+      return searchDocument(req, res);
     }
     models.Document.findById(req.params.id, {
       include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
     }).then((document) => {
       if (!document) {
-        res.send({ error: 'Document not found.' });
-        return
+        return res.status(404)
+          .send({ error: 'Document not found.' });
       }
       const result = filterDocs(req, document);
       if (!result.length) {
         res.status(401)
           .send({ error: 'You do not have permission to view this document.' });
-        return;
       } else {
         res.send(result);
       }
@@ -112,10 +98,11 @@ let docControl = {
     });
   },
 
-  createDocument: function (req, res) {
+  createDocument(req, res) {
     if (!req.decoded) {
-      res.send({ error: 'Only registered users can create documents.' });
-      return;
+      return res.send({
+        error: 'Only registered users can create documents.'
+      });
     }
     req.ownerId = req.decoded.id;
     models.Document.create(req.body).then((document) => {
@@ -126,11 +113,7 @@ let docControl = {
     });
   },
 
-  updateDocument: function (req, res) {
-    if (!req.decoded) {
-      res.send({ error: "You are not logged in." });
-      return;
-    }
+  updateDocument(req, res) {
     models.Document.findOne({
       where: { id: req.params.id }
     }).then((document) => {
@@ -148,11 +131,7 @@ let docControl = {
     });
   },
 
-  deleteDocument: function (req, res) {
-    if (!req.decoded) {
-      res.send({ error: "You are not logged in." });
-      return;
-    }
+  deleteDocument(req, res) {
     models.Document.findOne({
       where: { id: req.params.id }
     }).then((document) => {
@@ -170,5 +149,3 @@ let docControl = {
     });
   }
 }
-
-module.exports = docControl;

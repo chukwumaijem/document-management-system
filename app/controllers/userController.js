@@ -5,19 +5,19 @@ const models = require('../models/dbconnect'),
   bcrypt = require('bcryptjs');
 
 function handleError(res, reason, message, code) {
-  console.log('ERROR:' + reason);
+  console.log('error:' + reason);
   res.status(code || 500).json({ 'error': message });
-};
+}
 
 function createToken(userdata) {
   const token = jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
   return token;
-};
+}
 
-let userControl = {
+module.exports = {
 
   // login user control
-  loginUser: function (req, res) {
+  loginUser(req, res) {
     if (!req.body.username) {
       res.status(400)
         .send({ error: 'Username is required.' });
@@ -49,7 +49,7 @@ let userControl = {
   },
 
   // get user control
-  getUser: function (req, res) {
+  getUser(req, res) {
     models.User.findOne({
       where: {
         id: req.params.id
@@ -57,17 +57,19 @@ let userControl = {
       include: [{
         model: models.Role
       }]
-    })
-      .then((user) => {
-        res.json(user)
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error getting user');
-      });
+    }).then((user) => {
+      if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
+        res.send(user);
+      } else {
+        res.status(401).json({ error: 'You do not have permission to view user data.' });
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Error getting user');
+    });
   },
 
-  // get users
-  getUsers: function (req, res) {
+  // get all users. Only admins can access this route
+  getUsers(req, res) {
     models.User.findAll({
       include: [{
         model: models.Role
@@ -81,38 +83,30 @@ let userControl = {
       });
   },
 
-  getDocuments: function (req, res) {
+  getDocuments(req, res) {
     models.Document.findAll({
       where: { ownerId: req.params.id },
       include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
     }).then((document) => {
-      let result = document.filter((doc) => {
-        let isPublic = doc.public,
+      const result = document.filter((doc) => {
+        const isPublic = doc.public,
           isOwner = req.decoded && req.decoded.id === doc.ownerId,
           isAdmin = req.decoded && req.decoded.RoleId === 1;
 
         return isPublic || isOwner || isAdmin;
       });
-      if (document.length < 1) {
-        handleError(res, 'User have no documents.',
-          'No documents found for this user.', 404);
-      } else if (result.length < 1) {
-        handleError(res, 'User have no public documents.',
-          'User have no public documents.', 404);
-      } else {
-        res.status(200).send(result);
-      }
+      res.status(200).send(result);
     }).catch((err) => {
       handleError(res, err.message, 'Error getting user documents');
     });
   },
 
   // create new user control
-  createUser: function (req, res) {
+  createUser(req, res) {
     if (!req.body.username || !req.body.firstName ||
       !req.body.lastName || !req.body.email || !req.body.password) {
-      res.send({
-        Error: 'User data incomplete.'
+      res.status(400).send({
+        error: 'User data incomplete.'
       });
       return;
     }
@@ -136,52 +130,47 @@ let userControl = {
   },
 
   // update user data
-  updateUser: function (req, res) {
+  updateUser(req, res) {
     if (req.body.RoleId && req.decoded.RoleId !== 1) {
       res.status(401).send({ error: "Only an admin can add admins." });
       return;
     }
     models.User.findOne({
       where: { id: req.params.id }
-    })
-      .then((user) => {
-        if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
-          user.update(req.body);
-          res.send({
-            success: "User data updated.",
-            user
-          });
-          return;
-        } else {
-          res.status(401)
-            .send({ error: "You do not have permission to update user data." });
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Update failed');
-      });
+    }).then((user) => {
+      if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
+        user.update(req.body);
+        res.send({
+          success: "User data updated.",
+          user
+        });
+        return;
+      } else {
+        res.status(401)
+          .send({ error: "You do not have permission to update user data." });
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Update failed');
+    });
   },
 
-  deleteUser: function (req, res) {
+  // update user data
+  deleteUser(req, res) {
     models.User.findOne({
       where: { id: req.params.id }
-    })
-      .then((user) => {
-        if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
-          user.destroy();
-          res.send({
-            success: "User data deleted.",
-            username: user.username
-          });
-          return;
-        } else {
-          res.status(401).send({ error: "You do not have permission to delete user." });
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Cannot delete data.');
-      });
+    }).then((user) => {
+      if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
+        user.destroy();
+        res.send({
+          success: "User data deleted.",
+          username: user.username
+        });
+        return;
+      } else {
+        res.status(401).send({ error: "You do not have permission to delete user." });
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Cannot delete data.');
+    });
   }
 }
-
-module.exports = userControl;

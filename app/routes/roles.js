@@ -2,15 +2,14 @@
 
 const express = require('express'),
   roleControl = require('../controllers/roleController'),
-  roleRoutes = express.Router(),
-  adminAuth = require('../middleware/adminAuth');
+  roleRoutes = express.Router()
 
-roleRoutes.post('/', adminAuth, roleControl.createRole);
+roleRoutes.post('/', roleControl.createRole);
 
-roleRoutes.get('/', adminAuth, roleControl.getRoles);
+roleRoutes.get('/', roleControl.getRoles);
 
-roleRoutes.put('/:id', adminAuth, roleControl.updateRole);
+roleRoutes.put('/:id', roleControl.updateRole);
 
-roleRoutes.delete('/:id', adminAuth, roleControl.deleteRole);
+roleRoutes.delete('/:id', roleControl.deleteRole);
 
 module.exports = roleRoutes;
