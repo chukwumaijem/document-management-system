@@ -37,33 +37,27 @@ let userControl = {
               success: 'Login successful.',
               token
             });
+        } else {
+          res.status(400)
+            .send({
+              error: 'Login failed. Username or password invalid.'
+            });
         }
       }).catch((err) => {
-        handleError(res, err.message, 'Login failed. Username or password invalid.', 404);
-      });
-  },
-
-  // log out user control Should be fixed
-  logoutUser: function (req, res) {
-    models.User.findOne({ where: { username: req.body.username } })
-      .then((user) => {
-        res.send({ success: "User successfully logged out." })
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Logout failed.');
+        handleError(res, err.message, 'Login failed.', 404);
       });
   },
 
   // get user control
   getUser: function (req, res) {
     models.User.findOne({
-        where: {
-          id: req.params.id
-        },
-        include: [{
-          model: models.Role
-        }]
-      })
+      where: {
+        id: req.params.id
+      },
+      include: [{
+        model: models.Role
+      }]
+    })
       .then((user) => {
         res.json(user)
       })
@@ -75,10 +69,10 @@ let userControl = {
   // get users
   getUsers: function (req, res) {
     models.User.findAll({
-        include: [{
-          model: models.Role
-        }]
-      })
+      include: [{
+        model: models.Role
+      }]
+    })
       .then((users) => {
         res.json(users);
       })
@@ -89,31 +83,28 @@ let userControl = {
 
   getDocuments: function (req, res) {
     models.Document.findAll({
-        where: { ownerId: req.params.id },
-        include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
-      })
-      .then((document) => {
-        let result = document.filter((doc) => {
-          if (doc.public) {
-            return doc;
-          } else if ((req.decoded && req.decoded.id === doc.ownerId) ||
-            req.decoded.RoleId === 1) {
-            return doc;
-          }
-        });
-        if (document.length < 1) {
-          handleError(res, 'User have no documents.',
-            'No documents found for this user.');
-        } else if (result.length < 1) {
-          handleError(res, 'User have no public documents.',
-            'User have no public documents.');
-        } else {
-          res.send(result);
-        }
-      })
-      .catch((err) => {
-        handleError(res, err.message, 'Error getting user documents');
+      where: { ownerId: req.params.id },
+      include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
+    }).then((document) => {
+      let result = document.filter((doc) => {
+        let isPublic = doc.public,
+          isOwner = req.decoded && req.decoded.id === doc.ownerId,
+          isAdmin = req.decoded && req.decoded.RoleId === 1;
+
+        return isPublic || isOwner || isAdmin;
       });
+      if (document.length < 1) {
+        handleError(res, 'User have no documents.',
+          'No documents found for this user.', 404);
+      } else if (result.length < 1) {
+        handleError(res, 'User have no public documents.',
+          'User have no public documents.', 404);
+      } else {
+        res.status(200).send(result);
+      }
+    }).catch((err) => {
+      handleError(res, err.message, 'Error getting user documents');
+    });
   },
 
   // create new user control
@@ -124,36 +115,35 @@ let userControl = {
         Error: 'User data incomplete.'
       });
       return;
-    };
+    }
 
     models.User.create(req.body)
-      .then((newUser) => {
+      .then((user) => {
         let token = createToken({
-          id: newUser.id,
-          username: newUser.username,
-          RoleId: newUser.RoleId
+          id: user.id,
+          username: user.username,
+          RoleId: user.RoleId
         });
-        newUser.token = token;
-        newUser.success = 'User created.';
-        res.status(201).json(newUser);
+        res.status(201)
+          .send({
+            user,
+            token,
+            success: 'User created.'
+          });
       }).catch((err) => {
         handleError(res, err.message, 'User already exist.', 409);
       });
   },
 
-  // 
+  // update user data
   updateUser: function (req, res) {
-    if (!req.decoded) {
-      res.send({ error: "You are not logged in." });
-      return;
-    }
     if (req.body.RoleId && req.decoded.RoleId !== 1) {
-      res.send({ error: "Only an admin can add admins." });
+      res.status(401).send({ error: "Only an admin can add admins." });
       return;
     }
     models.User.findOne({
-        where: { id: req.params.id }
-      })
+      where: { id: req.params.id }
+    })
       .then((user) => {
         if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
           user.update(req.body);
@@ -163,7 +153,8 @@ let userControl = {
           });
           return;
         } else {
-          res.send({ error: "You do not permission to update user data." });
+          res.status(401)
+            .send({ error: "You do not have permission to update user data." });
         }
       })
       .catch((err) => {
@@ -172,17 +163,9 @@ let userControl = {
   },
 
   deleteUser: function (req, res) {
-    if (!req.decoded) {
-      res.send({ error: "You are not logged in." });
-      return;
-    }
-    if (req.body.RoleId && req.decoded.RoleId !== 1) {
-      res.send({ error: "Only an admin can add admins." });
-      return;
-    }
     models.User.findOne({
-        where: { id: req.params.id }
-      })
+      where: { id: req.params.id }
+    })
       .then((user) => {
         if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
           user.destroy();
@@ -192,7 +175,7 @@ let userControl = {
           });
           return;
         } else {
-          res.send({ error: "You do not have permission to delete user." });
+          res.status(401).send({ error: "You do not have permission to delete user." });
         }
       })
       .catch((err) => {

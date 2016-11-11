@@ -7,7 +7,7 @@ const express = require('express'),
   userAccess = require('../middleware/userAccess');
 
 // Creates a new document instance.
-documentRoutes.post('/', authenticate, userAccess, docControl.createDocument);
+documentRoutes.post('/', authenticate, docControl.createDocument);
 
 // Find matching instances of document.
 documentRoutes.get('/', userAccess, docControl.getDocuments);
@@ -16,9 +16,9 @@ documentRoutes.get('/', userAccess, docControl.getDocuments);
 documentRoutes.get('/:id', userAccess, docControl.getDocument);
 
 // Update document attributes.
-documentRoutes.put('/:id', authenticate, userAccess, docControl.updateDocument);
+documentRoutes.put('/:id', authenticate, docControl.updateDocument);
 
 // Delete document.
-documentRoutes.delete('/:id', authenticate, userAccess, docControl.deleteDocument);
+documentRoutes.delete('/:id', authenticate, docControl.deleteDocument);
 
 module.exports = documentRoutes;
