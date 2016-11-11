@@ -82,6 +82,10 @@ describe('Documents Test Suite', function () {
             return done(err);
           }
           expect(res.body).to.have.length.of.at.most(5);
+          expect(res.body[0].id).to.be.above(res.body[1].id);
+          expect(res.body[1].id).to.be.above(res.body[2].id);
+          expect(res.body[2].id).to.be.above(res.body[3].id);
+          expect(res.body[3].id).to.be.above(res.body[4].id);
           done();
         });
     });
@@ -118,6 +122,18 @@ describe('Documents Test Suite', function () {
           expect(res.body[1].createdAt).to.be.at.least(res.body[2].createdAt);
           expect(res.body[2].createdAt).to.be.at.least(res.body[3].createdAt);
           expect(res.body[3].createdAt).to.be.at.least(res.body[4].createdAt);
+          done();
+        });
+    });
+
+    it('should return a 404 for documents that do not exist', function (done) {
+      api.get('/documents/223')
+        .expect(404).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('Document not found.');
           done();
         });
     });
@@ -189,78 +205,85 @@ describe('Documents Test Suite', function () {
   });
 
   describe('Update document', function () {
-    it('should update document if tokenid matches user or admin', function (done) {
-      api.put('/documents/3').set({ 'x-access-token': adminToken })
-        .send({ title: 'Edited by admin.' }).expect(200)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('success');
-          expect(res.body.success).to.equal('Document successfully updated.');
-        });
+    it('should update document if tokenid matches user or admin',
+      function (done) {
+        api.put('/documents/3').set({ 'x-access-token': adminToken })
+          .send({ title: 'Edited by admin.' }).expect(200)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('success');
+            expect(res.body.success)
+              .to.equal('Document successfully updated.');
+          });
 
-      api.put('/documents/3').set({ 'x-access-token': userToken })
-        .send({ title: 'Edited by user.' }).expect(200)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('success');
-          expect(res.body.success).to.equal('Document successfully updated.');
-          done();
-        });
-    });
+        api.put('/documents/3').set({ 'x-access-token': userToken })
+          .send({ title: 'Edited by user.' }).expect(200)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('success');
+            expect(res.body.success)
+              .to.equal('Document successfully updated.');
+            done();
+          });
+      });
 
-    it('should return an error if user is guest not the owner', function (done) {
-      api.put('/documents/4').set({ 'x-access-token': userToken })
-        .send({ title: 'Can I edit?' })
-        .expect(401).end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('You do not have permission to update this document.');
-        });
+    it('should return an error if user is guest not the owner',
+      function (done) {
+        api.put('/documents/4').set({ 'x-access-token': userToken })
+          .send({ title: 'Can I edit?' })
+          .expect(401).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('error');
+            expect(res.body.error)
+              .to.equal('You do not have permission to update this document.');
+          });
 
-      api.put('/documents/4').send({ title: 'Can I edit?' })
-        .expect(401).end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('No token provided.');
-          done();
-        });
-    });
+        api.put('/documents/4').send({ title: 'Can I edit?' })
+          .expect(401).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('error');
+            expect(res.body.error).to.equal('No token provided.');
+            done();
+          });
+      });
   });
 
   describe('Delete document', function () {
-    it('should delete document if token matches admin or owner token', function (done) {
-      api.delete('/documents/7').set({'x-access-token': adminToken})
-        .expect(200).end((err, res) => {
-          if(err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('success');
-          expect(res.body.success).to.equal('Document deleted.');
-          done();
-        });
-    });
+    it('should delete document if token matches admin or owner token',
+      function (done) {
+        api.delete('/documents/7').set({ 'x-access-token': adminToken })
+          .expect(200).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('success');
+            expect(res.body.success).to.equal('Document deleted.');
+            done();
+          });
+      });
 
-    it('should return error if user not owner or is guest', function(done) {
-      api.delete('/documents/4').set({'x-access-token': userToken})
+    it('should return error if user not owner or is guest', function (done) {
+      api.delete('/documents/4').set({ 'x-access-token': userToken })
         .expect(401).end((err, res) => {
-          if(err) {
+          if (err) {
             return done(err);
           }
           expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('You do not have permission to delete this document.');
+          expect(res.body.error)
+            .to.equal('You do not have permission to delete this document.');
         });
 
       api.delete('/documents/4')
         .expect(401).end((err, res) => {
-          if(err) {
+          if (err) {
             return done(err);
           }
           expect(res.body).to.have.property('error');

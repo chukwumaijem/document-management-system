@@ -31,7 +31,8 @@ describe('Role Tests', function () {
             return done(err);
           }
           expect(res.body).to.have.property('success');
-          expect(res.body.success).to.equal('New role created successfully.');
+          expect(res.body.success)
+            .to.equal('New role created successfully.');
           done();
         });
     });
@@ -73,18 +74,24 @@ describe('Role Tests', function () {
   });
 
   describe('Get Role', function () {
+    let roles;
     it('should return all the roles available', function (done) {
       api.get('/roles').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
             return done(err);
           }
+          roles = res.body;
           expect(res.body).to.have.lengthOf(3);
-          if (err) return done(err);
           done();
         });
     });
 
+    it('should return at least admin and user roles', function (done) {
+      expect(roles[0].title).to.equal('Admin');
+      expect(roles[1].title).to.equal('User');
+      done();
+    });
 
     it('should return error for non-admin users', function (done) {
       api.get('/roles').set({ 'x-access-token': userToken })
@@ -122,18 +129,19 @@ describe('Role Tests', function () {
         });
     });
 
-    it('should return approprite message for roles that do not exist', function (done) {
-      api.put('/roles/4').set({ 'x-access-token': adminToken })
-        .send({ title: 'Newbie' })
-        .expect(400).end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('Role does not exist.');
-          done();
-        });
-    });
+    it('should return approprite message for roles that do not exist',
+      function (done) {
+        api.put('/roles/4').set({ 'x-access-token': adminToken })
+          .send({ title: 'Newbie' })
+          .expect(400).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('error');
+            expect(res.body.error).to.equal('Role does not exist.');
+            done();
+          });
+      });
 
 
     it('should return error for non-admin users', function (done) {
@@ -167,22 +175,24 @@ describe('Role Tests', function () {
             return done(err);
           }
           expect(res.body).to.have.property('success');
-          expect(res.body.success).to.equal('Role was deleted successfully.');
+          expect(res.body.success)
+            .to.equal('Role was deleted successfully.');
           done();
         });
     });
 
-    it('should return approprite message for roles that do not exist', function (done) {
-      api.delete('/roles/4').set({ 'x-access-token': adminToken })
-        .expect(400).end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('Role does not exist.');
-          done();
-        });
-    });
+    it('should return approprite message for roles that do not exist',
+      function (done) {
+        api.delete('/roles/4').set({ 'x-access-token': adminToken })
+          .expect(400).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('error');
+            expect(res.body.error).to.equal('Role does not exist.');
+            done();
+          });
+      });
 
     it('should return error for non-admin users', function (done) {
       api.delete('/roles/3').set({ 'x-access-token': userToken })
