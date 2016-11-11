@@ -5,7 +5,8 @@ require('dotenv').config({ silent: true });
 
 const express = require('express'),
   bodyParser = require('body-parser'),
-  models = require('./app/models/dbconnect');
+  models = require('./app/models/dbconnect'),
+  adminAuth = require('./app/middleware/adminAuth');
 
 // import app routes
 const homeRoute = require('./app/routes/index'),
@@ -21,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // set up routes for the app
 app.use('/', homeRoute);
 app.use('/users', userRoutes);
-app.use('/roles', roleRoutes);
+app.use('/roles', adminAuth, roleRoutes);
 app.use('/documents', documentRoutes);
 
 // catch unknown routes

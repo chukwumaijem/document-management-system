@@ -1,4 +1,5 @@
 'use strict';
+// import userControl from '../controllers/userController';
 
 const express = require('express'),
   userRoutes = express.Router(),
