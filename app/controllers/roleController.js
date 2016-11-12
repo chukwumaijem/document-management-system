@@ -7,7 +7,7 @@ function handleError(res, reason, message, code) {
   res.status(code || 500).json({ 'error': message });
 }
 
-module.exports = {
+class roleControl {
 
   createRole(req, res) {
     models.Role.create(req.body).then((role) => {
@@ -18,7 +18,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Role already exists.', 409);
     });
-  },
+  }
 
   getRoles(req, res) {
     models.Role.findAll().then((role) => {
@@ -26,7 +26,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error fetching role.');
     });
-  },
+  }
 
   updateRole(req, res) {
     models.Role.findOne({
@@ -48,7 +48,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Role cannot be updated.');
     });
-  },
+  }
 
   deleteRole(req, res) {
     models.Role.findOne({
@@ -69,3 +69,5 @@ module.exports = {
   }
 
 }
+
+module.exports = new roleControl();

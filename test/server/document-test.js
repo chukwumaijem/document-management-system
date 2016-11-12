@@ -202,6 +202,16 @@ describe('Documents Test Suite', function () {
         });
     });
 
+    it('should return only public documents for guests', function (done) {
+      api.get('/documents')
+        .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.lengthOf(2);
+          done();
+        });
+    });
   });
 
   describe('Update document', function () {

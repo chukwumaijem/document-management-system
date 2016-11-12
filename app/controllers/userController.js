@@ -10,11 +10,10 @@ function handleError(res, reason, message, code) {
 }
 
 function createToken(userdata) {
-  const token = jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
-  return token;
+  return jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
 }
 
-module.exports = {
+class userControl {
 
   // login user control
   loginUser(req, res) {
@@ -46,7 +45,7 @@ module.exports = {
       }).catch((err) => {
         handleError(res, err.message, 'Login failed.', 404);
       });
-  },
+  }
 
   // get user control
   getUser(req, res) {
@@ -66,7 +65,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error getting user');
     });
-  },
+  }
 
   // get all users. Only admins can access this route
   getUsers(req, res) {
@@ -81,7 +80,7 @@ module.exports = {
       .catch((err) => {
         handleError(res, err, 'Error getting users');
       });
-  },
+  }
 
   getDocuments(req, res) {
     models.Document.findAll({
@@ -99,7 +98,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error getting user documents');
     });
-  },
+  }
 
   // create new user control
   createUser(req, res) {
@@ -127,7 +126,7 @@ module.exports = {
       }).catch((err) => {
         handleError(res, err.message, 'User already exist.', 409);
       });
-  },
+  }
 
   // update user data
   updateUser(req, res) {
@@ -152,7 +151,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Update failed');
     });
-  },
+  }
 
   // update user data
   deleteUser(req, res) {
@@ -174,3 +173,5 @@ module.exports = {
     });
   }
 }
+
+module.exports = new userControl();

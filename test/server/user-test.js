@@ -415,16 +415,16 @@ describe('User Tests', function () {
 
     it('should return error for user role update if tokenid does not' +
       'match admin token', function (done) {
-      api.put('/users/7').set({ 'x-access-token': userToken })
-        .send({ RoleId: 1 }).expect(401).end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.have.property('error');
-          expect(res.body.error).to.equal('Only an admin can add admins.');
-          done();
-        });
-    });
+        api.put('/users/7').set({ 'x-access-token': userToken })
+          .send({ RoleId: 1 }).expect(401).end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.have.property('error');
+            expect(res.body.error).to.equal('Only an admin can add admins.');
+            done();
+          });
+      });
   })
 
   describe('Delete user', function () {
@@ -517,3 +517,75 @@ describe('User Tests', function () {
   })
 
 });
+
+describe('Home route', function () {
+  it('should return welcome message', function (done) {
+    api.get('/').expect(200).end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.body).to.have.property('message');
+      expect(res.body.message).to.equal('Welcome to Document Management App.');
+      done();
+    });
+  });
+
+  it('should return error for an unknown route', function (done) {
+    api.get('/wrong').expect(404).end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.body).to.have.property('error');
+      expect(res.body.error)
+        .to.equal('Requested route does not exist yet. Check back later. :wink:');
+      done();
+    });
+  });
+});
+
+describe('Expired JWT Tests', function () {
+
+  const expiredJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+    'eyJpZCI6MSwidXNlcm5hbWUiOiJlYnVrYSIsIlJvbGVJZCI6MSwiaWF0IjoxND' +
+    'c4ODY1NDg0LCJleHAiOjE0Nzg4NjU1NDR9.z-Zfdcr1b3blN6KTdhDJdYF5oRjSQT3' +
+    '_r1prPU8i5uI';
+
+  it('should return error for expired JWT on auth middleware',
+    function (done) {
+      api.get('/users/3').set({ 'x-access-token': expiredJWT })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('jwt expired');
+          done();
+        });
+    });
+
+  it('should return error for expired JWT on admin middleware',
+    function (done) {
+      api.get('/users').set({ 'x-access-token': expiredJWT })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('jwt expired');
+          done();
+        });
+    });
+
+  it('should return error for expired JWT on userAccess middleware',
+    function (done) {
+      api.get('/users/4/documents').set({ 'x-access-token': expiredJWT })
+        .expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('jwt expired');
+          done();
+        });
+    });
+})

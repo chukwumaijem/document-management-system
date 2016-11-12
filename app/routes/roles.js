@@ -2,7 +2,7 @@
 
 const express = require('express'),
   roleControl = require('../controllers/roleController'),
-  roleRoutes = express.Router()
+  roleRoutes = express.Router();
 
 roleRoutes.post('/', roleControl.createRole);
 

@@ -60,7 +60,7 @@ function searchDocument(req, res) {
   });
 }
 
-module.exports = {
+class docControl {
   getDocuments(req, res) {
     models.Document.findAll({
       include: [{ model: models.Role },
@@ -73,7 +73,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error fetching documents.');
     });
-  },
+  }
 
   getDocument(req, res) {
     if (Object.keys(req.query).length) {
@@ -96,14 +96,9 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error fetching document.');
     });
-  },
+  }
 
   createDocument(req, res) {
-    if (!req.decoded) {
-      return res.send({
-        error: 'Only registered users can create documents.'
-      });
-    }
     req.ownerId = req.decoded.id;
     models.Document.create(req.body).then((document) => {
       res.status(201)
@@ -111,7 +106,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error creating document.');
     });
-  },
+  }
 
   updateDocument(req, res) {
     models.Document.findOne({
@@ -129,7 +124,7 @@ module.exports = {
     }).catch((err) => {
       handleError(res, err.message, 'Error updating document.');
     });
-  },
+  }
 
   deleteDocument(req, res) {
     models.Document.findOne({
@@ -149,3 +144,5 @@ module.exports = {
     });
   }
 }
+
+module.exports = new docControl();

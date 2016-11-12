@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/aezumezu/document-management-system.svg?branch=develop)](https://travis-ci.org/aezumezu/document-management-system)   [![Code Climate](https://codeclimate.com/github/aezumezu/document-management-system/badges/gpa.svg)](https://codeclimate.com/github/aezumezu/document-management-system)   [![Coverage Status](https://coveralls.io/repos/github/aezumezu/document-management-system/badge.svg?branch=develop)](https://coveralls.io/github/aezumezu/document-management-system?branch=develop)
 
-
 The system manages documents, users and user roles. Each document defines access rights; the document defines which roles can access it. Also, each document specifies the date it was published.
 This API was built to handle document management. This API would serve as the brains to track, manage and store documents and reduce paper. This API is capable of keeping a record of the documents created and modified by different users. It also allows for the assignment of roles to different users. This API also allows the end user to get the exact number of documents they require and set special queries for more precise matching.
 
@@ -16,11 +15,11 @@ git clone https://github.com/aezumezu/document-management-system.git
 
 Next, you will need to create a .env file to store the environment variables in the root directory of the app. Your .env file must conform to the pattern shown below.
 
-database = *_the name of your database_*  
-secret = *_secret key to use in the app_*  
-dbusername = *_your database username_*   
-dbpassword = *_your database password_*   
-PORT = *_port to start the app. If ommited, default port 3000 will be used_*   
+database = ***_the name of your database_***  
+secret = ***_secret key to use in the app_***  
+dbusername = ***_your database username_***   
+dbpassword = ***_your database password_***   
+PORT = ***_port to start the app. If ommited, default port 3000 will be used_***   
 
 
 Run *_npm install_* to install app dependencies

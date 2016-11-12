@@ -27,9 +27,8 @@ app.use('/documents', documentRoutes);
 
 // catch unknown routes
 app.use(function (req, res) {
-  res.json({
-    status: 404,
-    message: 'Requested route does not exist yet. Check back later. :wink:'
+  res.status(404).json({
+    error: 'Requested route does not exist yet. Check back later. :wink:'
   });
 });
 
