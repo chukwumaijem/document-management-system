@@ -6,8 +6,8 @@ const app = require('../../server'),
   api = supertest(app),
   bcrypt = require('bcryptjs');
 
-describe('User Tests', function () {
-  let userOne = {
+describe('User Tests', () => {
+  const userOne = {
     username: 'helen',
     firstName: 'Helena',
     lastName: 'Johnson',
@@ -16,8 +16,8 @@ describe('User Tests', function () {
   };
   let adminToken, userToken;
 
-  describe('Login User', function () {
-    it('should login in a registered user.', function (done) {
+  describe('Login User', () => {
+    it('should login in a registered user.', (done) => {
       api.post('/users/login')
         .send({ username: 'ebuka', password: 'ebukaakubu' })
         .expect(200).end((err, res) => {
@@ -43,7 +43,7 @@ describe('User Tests', function () {
     });
 
     it('should throw an error if username is not provided',
-      function (done) {
+      (done) => {
         api.post('/users/login').send({ password: 'ebukaakubu' })
           .expect(400).end((err, res) => {
             if (err) {
@@ -56,7 +56,7 @@ describe('User Tests', function () {
       });
 
     it('should throw an error if password is not provided',
-      function (done) {
+      (done) => {
         api.post('/users/login').send({ username: 'ebuka' })
           .expect(400).end((err, res) => {
             if (err) {
@@ -69,7 +69,7 @@ describe('User Tests', function () {
       });
 
     it('should throw an error if username or password is invalid',
-      function (done) {
+      (done) => {
         api.post('/users/login')
           .send({ username: 'ebuka', password: 'wrongpassword' })
           .expect(400).end((err, res) => {
@@ -84,10 +84,10 @@ describe('User Tests', function () {
       });
   });
 
-  describe('Create user', function () {
+  describe('Create user', () => {
     let resData, errData;
     it('should validate that required user data is provided',
-      function (done) {
+      (done) => {
         api.post('/users')
           .send(userOne)
           .expect(201).end((err, res) => {
@@ -106,7 +106,7 @@ describe('User Tests', function () {
       });
 
     it('should return an error for incomplete user data',
-      function (done) {
+      (done) => {
         api.post('/users')
           .send({
             username: 'myname',
@@ -125,7 +125,7 @@ describe('User Tests', function () {
       });
 
     it('should validate that provided user data is valid',
-      function (done) {
+      (done) => {
         if (errData) {
           return done(errData);
         }
@@ -140,20 +140,21 @@ describe('User Tests', function () {
         done();
       });
 
-    it('should add a new user to the database', function (done) {
+    it('should add a new user to the database', (done) => {
       api.get('/users')
         .set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
             return done(err);
           }
+          expect(res.body).to.be.instanceof(Array);
           expect(res.body).to.have.lengthOf(5);
           done();
         });
     });
 
     it('should validate that a new user created is unique',
-      function (done) {
+      (done) => {
         api.post('/users').send(userOne)
           .expect(409).end((err, res) => {
             if (err) {
@@ -166,7 +167,7 @@ describe('User Tests', function () {
       });
 
     it('should validate that a new user created has a role',
-      function (done) {
+      (done) => {
         if (errData) {
           return done(errData);
         }
@@ -177,7 +178,7 @@ describe('User Tests', function () {
       });
 
     it('should validate that a new user has firstName and lastName',
-      function (done) {
+      (done) => {
         if (errData) {
           return done(errData);
         }
@@ -189,9 +190,9 @@ describe('User Tests', function () {
       });
   });
 
-  describe('Get users', function () {
+  describe('Get users', () => {
     it('should return the user if userid matches tokenid',
-      function (done) {
+      (done) => {
         api.get('/users/3').set({ 'x-access-token': userToken })
           .expect(200).end((err, res) => {
             if (err) {
@@ -212,18 +213,19 @@ describe('User Tests', function () {
       });
 
     it('should return all users if no user-id is specified',
-      function (done) {
+      (done) => {
         api.get('/users').set({ 'x-access-token': adminToken })
           .expect(200).end((err, res) => {
             if (err) {
               return done(err);
             }
+            expect(res.body).to.be.instanceof(Array);
             expect(res.body).to.have.lengthOf(5);
             done();
           });
       });
 
-    it('should return an error if user is not admin', function (done) {
+    it('should return an error if user is not admin', (done) => {
       api.get('/users').set({ 'x-access-token': userToken })
         .expect(401).end((err, res) => {
           if (err) {
@@ -244,7 +246,7 @@ describe('User Tests', function () {
     });
 
     it('should return the user with the specified user-id',
-      function (done) {
+      (done) => {
         api.get('/users/5').set({ 'x-access-token': adminToken })
           .expect(200).end((err, res) => {
             if (err) {
@@ -267,7 +269,7 @@ describe('User Tests', function () {
       });
 
     it('should return an error if user is not registered',
-      function (done) {
+      (done) => {
         api.get('/users/4').expect(401).end((err, res) => {
           if (err) {
             return done(err);
@@ -279,7 +281,7 @@ describe('User Tests', function () {
       });
 
     it('should return an error if userid does not match tokenid',
-      function (done) {
+      (done) => {
         api.get('/users/4').set({ 'x-access-token': userToken })
           .expect(401).end((err, res) => {
             if (err) {
@@ -293,14 +295,15 @@ describe('User Tests', function () {
 
   });
 
-  describe('Get user documents', function () {
+  describe('Get user documents', () => {
     it('should return all user documents for admins and owners',
-      function (done) {
+      (done) => {
         api.get('/users/3/documents').set({ 'x-access-token': adminToken })
           .expect(200).end((err, res) => {
             if (err) {
               return done(err);
             }
+            expect(res.body).to.be.instanceof(Array);
             expect(res.body).to.have.lengthOf(3);
           });
         api.get('/users/3/documents').set({ 'x-access-token': userToken })
@@ -308,18 +311,20 @@ describe('User Tests', function () {
             if (err) {
               return done(err);
             }
+            expect(res.body).to.be.instanceof(Array);
             expect(res.body).to.have.lengthOf(3);
             done();
           });
       });
 
     it('should return only users public documents for guests and other users',
-      function (done) {
+      (done) => {
         api.get('/users/2/documents').set({ 'x-access-token': userToken })
           .expect(200).end((err, res) => {
             if (err) {
               return done(err);
             }
+            expect(res.body).to.be.instanceof(Array);
             expect(res.body).to.have.lengthOf(1);
           });
         api.get('/users/2/documents')
@@ -327,13 +332,14 @@ describe('User Tests', function () {
             if (err) {
               return done(err);
             }
+            expect(res.body).to.be.instanceof(Array);
             expect(res.body).to.have.lengthOf(1);
             done();
           });
       });
   });
 
-  describe('Update user', function () {
+  describe('Update user', () => {
     let newToken;
     const newUser = {
       username: 'michael',
@@ -343,7 +349,7 @@ describe('User Tests', function () {
       password: 'michael'
     };
 
-    before(function (done) {
+    before((done) => {
       api.post('/users').send(newUser)
         .end((err, res) => {
           newToken = res.body.token;
@@ -352,7 +358,7 @@ describe('User Tests', function () {
     });
 
     it('should update user if tokenid matches user or admin',
-      function (done) {
+      (done) => {
         api.put('/users/7').set({ 'x-access-token': adminToken })
           .send({ username: 'emmanuel' })
           .expect(200).end((err, res) => {
@@ -376,7 +382,7 @@ describe('User Tests', function () {
       });
 
     it('should return an error if tokenid does not match user or admin',
-      function (done) {
+      (done) => {
         api.put('/users/7').send({ username: 'emmanuel' })
           .expect(401).end((err, res) => {
             if (err) {
@@ -400,7 +406,7 @@ describe('User Tests', function () {
       });
 
     it('should update user role if tokenid matches admin token',
-      function (done) {
+      (done) => {
         api.put('/users/7').set({ 'x-access-token': adminToken })
           .send({ RoleId: 1 }).expect(200).end((err, res) => {
             if (err) {
@@ -414,20 +420,20 @@ describe('User Tests', function () {
       });
 
     it('should return error for user role update if tokenid does not' +
-      'match admin token', function (done) {
-        api.put('/users/7').set({ 'x-access-token': userToken })
-          .send({ RoleId: 1 }).expect(401).end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.have.property('error');
-            expect(res.body.error).to.equal('Only an admin can add admins.');
-            done();
-          });
-      });
+      'match admin token', (done) => {
+      api.put('/users/7').set({ 'x-access-token': userToken })
+        .send({ RoleId: 1 }).expect(401).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.have.property('error');
+          expect(res.body.error).to.equal('Only an admin can change roles.');
+          done();
+        });
+    });
   })
 
-  describe('Delete user', function () {
+  describe('Delete user', () => {
     let newToken;
     const delUserOne = {
       username: 'micl',
@@ -450,7 +456,7 @@ describe('User Tests', function () {
       email: 'mich@nso.com',
       password: 'michael'
     };
-    before(function (done) {
+    before((done) => {
       api.post('/users').send(delUserOne)
         .end((err, res) => {
         });
@@ -464,7 +470,7 @@ describe('User Tests', function () {
         });
     });
 
-    it('should delete user if tokenid matches admin', function (done) {
+    it('should delete user if tokenid matches admin', (done) => {
       api.delete('/users/8').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
@@ -478,7 +484,7 @@ describe('User Tests', function () {
         });
     });
 
-    it('should delete user if tokenid matches user', function (done) {
+    it('should delete user if tokenid matches user', (done) => {
       api.delete('/users/9').set({ 'x-access-token': newToken })
         .expect(200).end((err, res) => {
           if (err) {
@@ -493,7 +499,7 @@ describe('User Tests', function () {
     });
 
     it('should return an error if tokenid does not match user or admin',
-      function (done) {
+      (done) => {
         api.delete('/users/10')
           .expect(401).end((err, res) => {
             if (err) {
@@ -518,8 +524,8 @@ describe('User Tests', function () {
 
 });
 
-describe('Home route', function () {
-  it('should return welcome message', function (done) {
+describe('Home route', () => {
+  it('should return welcome message', (done) => {
     api.get('/').expect(200).end((err, res) => {
       if (err) {
         return done(err);
@@ -530,7 +536,7 @@ describe('Home route', function () {
     });
   });
 
-  it('should return error for an unknown route', function (done) {
+  it('should return error for an unknown route', (done) => {
     api.get('/wrong').expect(404).end((err, res) => {
       if (err) {
         return done(err);
@@ -543,7 +549,7 @@ describe('Home route', function () {
   });
 });
 
-describe('Expired JWT Tests', function () {
+describe('Expired JWT Tests', () => {
 
   const expiredJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
     'eyJpZCI6MSwidXNlcm5hbWUiOiJlYnVrYSIsIlJvbGVJZCI6MSwiaWF0IjoxND' +
@@ -551,7 +557,7 @@ describe('Expired JWT Tests', function () {
     '_r1prPU8i5uI';
 
   it('should return error for expired JWT on auth middleware',
-    function (done) {
+    (done) => {
       api.get('/users/3').set({ 'x-access-token': expiredJWT })
         .expect(401).end((err, res) => {
           if (err) {
@@ -564,7 +570,7 @@ describe('Expired JWT Tests', function () {
     });
 
   it('should return error for expired JWT on admin middleware',
-    function (done) {
+    (done) => {
       api.get('/users').set({ 'x-access-token': expiredJWT })
         .expect(401).end((err, res) => {
           if (err) {
@@ -577,7 +583,7 @@ describe('Expired JWT Tests', function () {
     });
 
   it('should return error for expired JWT on userAccess middleware',
-    function (done) {
+    (done) => {
       api.get('/users/4/documents').set({ 'x-access-token': expiredJWT })
         .expect(401).end((err, res) => {
           if (err) {

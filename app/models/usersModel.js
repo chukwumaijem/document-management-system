@@ -44,7 +44,7 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   User.beforeCreate(function (user) {
-    let salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(10);
     user.password = bcrypt.hashSync(user.password, salt);
   });
 

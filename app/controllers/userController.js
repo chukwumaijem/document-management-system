@@ -1,22 +1,14 @@
 'use strict';
 
 const models = require('../models/dbconnect'),
-  jwt = require('jsonwebtoken'),
+  helpers = require('./helperMethods'),
+  helperMethods = new helpers(models),
   bcrypt = require('bcryptjs');
 
-function handleError(res, reason, message, code) {
-  console.log('error:' + reason);
-  res.status(code || 500).json({ 'error': message });
-}
-
-function createToken(userdata) {
-  return jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
-}
-
-class userControl {
+class UserControl {
 
   // login user control
-  loginUser(req, res) {
+  loginUser(req, res, next) {
     if (!req.body.username) {
       res.status(400)
         .send({ error: 'Username is required.' });
@@ -30,7 +22,7 @@ class userControl {
     models.User.findOne({ where: { username: req.body.username } })
       .then((user) => {
         if (bcrypt.compareSync(req.body.password, user.password)) {
-          const token = createToken({ id: user.id, username: user.username, RoleId: user.RoleId });
+          const token = helperMethods.createToken({ id: user.id, username: user.username, RoleId: user.RoleId });
           res.status(200)
             .send({
               success: 'Login successful.',
@@ -43,12 +35,14 @@ class userControl {
             });
         }
       }).catch((err) => {
-        handleError(res, err.message, 'Login failed.', 404);
+        err.reason = 'Login failed.';
+        err.code = 404;
+        next(err);
       });
   }
 
   // get user control
-  getUser(req, res) {
+  getUser(req, res, next) {
     models.User.findOne({
       where: {
         id: req.params.id
@@ -63,12 +57,13 @@ class userControl {
         res.status(401).json({ error: 'You do not have permission to view user data.' });
       }
     }).catch((err) => {
-      handleError(res, err.message, 'Error getting user');
+      err.reason = 'Error getting user';
+      next(err);
     });
   }
 
   // get all users. Only admins can access this route
-  getUsers(req, res) {
+  getUsers(req, res, next) {
     models.User.findAll({
       include: [{
         model: models.Role
@@ -78,30 +73,26 @@ class userControl {
         res.json(users);
       })
       .catch((err) => {
-        handleError(res, err, 'Error getting users');
+        err.reason = 'Error getting users';
+        next(err);
       });
   }
 
-  getDocuments(req, res) {
+  // get documents belonging to this user
+  getDocuments(req, res, next) {
     models.Document.findAll({
       where: { ownerId: req.params.id },
       include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
     }).then((document) => {
-      const result = document.filter((doc) => {
-        const isPublic = doc.public,
-          isOwner = req.decoded && req.decoded.id === doc.ownerId,
-          isAdmin = req.decoded && req.decoded.RoleId === 1;
-
-        return isPublic || isOwner || isAdmin;
-      });
-      res.status(200).send(result);
+      res.status(200).send(helperMethods.filterDocs(req, document));
     }).catch((err) => {
-      handleError(res, err.message, 'Error getting user documents');
+      err.reason = 'Error getting user documents';
+      next(err);
     });
   }
 
   // create new user control
-  createUser(req, res) {
+  createUser(req, res, next) {
     if (!req.body.username || !req.body.firstName ||
       !req.body.lastName || !req.body.email || !req.body.password) {
       res.status(400).send({
@@ -112,7 +103,7 @@ class userControl {
 
     models.User.create(req.body)
       .then((user) => {
-        let token = createToken({
+        const token = helperMethods.createToken({
           id: user.id,
           username: user.username,
           RoleId: user.RoleId
@@ -124,14 +115,16 @@ class userControl {
             success: 'User created.'
           });
       }).catch((err) => {
-        handleError(res, err.message, 'User already exist.', 409);
+        err.reason = 'User already exist.';
+        err.code = 409;
+        next(err);
       });
   }
 
   // update user data
-  updateUser(req, res) {
+  updateUser(req, res, next) {
     if (req.body.RoleId && req.decoded.RoleId !== 1) {
-      res.status(401).send({ error: "Only an admin can add admins." });
+      res.status(401).send({ error: 'Only an admin can change roles.' });
       return;
     }
     models.User.findOne({
@@ -140,21 +133,22 @@ class userControl {
       if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
         user.update(req.body);
         res.send({
-          success: "User data updated.",
+          success: 'User data updated.',
           user
         });
         return;
       } else {
         res.status(401)
-          .send({ error: "You do not have permission to update user data." });
+          .send({ error: 'You do not have permission to update user data.' });
       }
     }).catch((err) => {
-      handleError(res, err.message, 'Update failed');
+      err.reason = 'Update failed.';
+      next(err);
     });
   }
 
   // update user data
-  deleteUser(req, res) {
+  deleteUser(req, res, next) {
     models.User.findOne({
       where: { id: req.params.id }
     }).then((user) => {
@@ -169,9 +163,10 @@ class userControl {
         res.status(401).send({ error: "You do not have permission to delete user." });
       }
     }).catch((err) => {
-      handleError(res, err.message, 'Cannot delete data.');
+      err.reason = 'Cannot delete data.';
+      next(err);
     });
   }
 }
 
-module.exports = new userControl();
+module.exports = new UserControl();
