@@ -2,40 +2,38 @@
 
 const models = require('../models/dbconnect');
 
-function handleError(res, reason, message, code) {
-  console.log('error:' + reason);
-  res.status(code || 500).json({ 'error': message });
-}
+class RoleControl {
 
-class roleControl {
-
-  createRole(req, res) {
+  createRole(req, res, next) {
     models.Role.create(req.body).then((role) => {
       res.status(201)
         .send({
           success: "New role created successfully."
         });
     }).catch((err) => {
-      handleError(res, err.message, 'Role already exists.', 409);
+      err.reason = 'Role already exists.';
+      err.code = 409;
+      next(err);
     });
   }
 
-  getRoles(req, res) {
+  getRoles(req, res, next) {
     models.Role.findAll().then((role) => {
       res.json(role);
     }).catch((err) => {
-      handleError(res, err.message, 'Error fetching role.');
+      err.reason = 'Error fetching role.';
+      next(err);
     });
   }
 
-  updateRole(req, res) {
+  updateRole(req, res, next) {
     models.Role.findOne({
       where: {
         id: req.params.id
       }
     }).then((role) => {
       if (!role) {
-        res.status(400)
+        res.status(404)
           .send({ error: 'Role does not exist.' });
         return;
       }
@@ -46,16 +44,17 @@ class roleControl {
           title: role.title
         });
     }).catch((err) => {
-      handleError(res, err.message, 'Role cannot be updated.');
+      err.reason = 'Role cannot be updated.';
+      next(err);
     });
   }
 
-  deleteRole(req, res) {
+  deleteRole(req, res, next) {
     models.Role.findOne({
       where: { id: req.params.id }
     }).then((role) => {
       if (!role) {
-        res.status(400)
+        res.status(404)
           .send({ error: 'Role does not exist.' });
         return;
       }
@@ -64,10 +63,11 @@ class roleControl {
         success: 'Role was deleted successfully.'
       });
     }).catch((err) => {
-      handleError(res, err.message, 'Role cannot be deleted.');
+      err.reason = 'Role cannot be deleted.';
+      next(err);
     });
   }
 
 }
 
-module.exports = new roleControl();
+module.exports = new RoleControl();
