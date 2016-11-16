@@ -5,10 +5,10 @@ const expect = require('chai').expect;
 const supertest = require('supertest');
 const api = supertest(app);
 
-describe('Role Tests', function () {
+describe('Role Tests', () => {
   let adminToken, userToken;
 
-  before(function (done) {
+  before((done) => {
     api.post('/users/login')
       .send({ username: 'ebuka', password: 'ebukaakubu' })
       .expect(200).end((err, res) => {
@@ -22,8 +22,8 @@ describe('Role Tests', function () {
       });
   });
 
-  describe('Create Role', function () {
-    it('should add a role if role does not exist', function (done) {
+  describe('Create Role', () => {
+    it('should add a role if role does not exist', (done) => {
       api.post('/roles').set({ 'x-access-token': adminToken })
         .send({ title: 'Editor' })
         .expect(201).end((err, res) => {
@@ -37,7 +37,7 @@ describe('Role Tests', function () {
         });
     });
 
-    it('should not add role if it exists', function (done) {
+    it('should not add role if it exists', (done) => {
       api.post('/roles').set({ 'x-access-token': adminToken })
         .send({ title: 'Editor' })
         .expect(409).end((err, res) => {
@@ -50,7 +50,7 @@ describe('Role Tests', function () {
         });
     });
 
-    it('should return error for non-admin users', function (done) {
+    it('should return error for non-admin users', (done) => {
       api.post('/roles').set({ 'x-access-token': userToken })
         .send({ title: 'Member' })
         .expect(401).end((err, res) => {
@@ -73,27 +73,28 @@ describe('Role Tests', function () {
     });
   });
 
-  describe('Get Role', function () {
+  describe('Get Role', () => {
     let roles;
-    it('should return all the roles available', function (done) {
+    it('should return all the roles available', (done) => {
       api.get('/roles').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
             return done(err);
           }
           roles = res.body;
+          expect(res.body).to.be.instanceof(Array);
           expect(res.body).to.have.lengthOf(3);
           done();
         });
     });
 
-    it('should return at least admin and user roles', function (done) {
+    it('should return at least admin and user roles', (done) => {
       expect(roles[0].title).to.equal('Admin');
       expect(roles[1].title).to.equal('User');
       done();
     });
 
-    it('should return error for non-admin users', function (done) {
+    it('should return error for non-admin users', (done) => {
       api.get('/roles').set({ 'x-access-token': userToken })
         .expect(401).end((err, res) => {
           if (err) {
@@ -115,8 +116,8 @@ describe('Role Tests', function () {
     });
   });
 
-  describe('Update role', function () {
-    it('should update existing roles', function (done) {
+  describe('Update role', () => {
+    it('should update existing roles', (done) => {
       api.put('/roles/2').set({ 'x-access-token': adminToken })
         .send({ title: 'Reader' })
         .expect(200).end((err, res) => {
@@ -130,10 +131,10 @@ describe('Role Tests', function () {
     });
 
     it('should return approprite message for roles that do not exist',
-      function (done) {
+      (done) => {
         api.put('/roles/4').set({ 'x-access-token': adminToken })
           .send({ title: 'Newbie' })
-          .expect(400).end((err, res) => {
+          .expect(404).end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -144,7 +145,7 @@ describe('Role Tests', function () {
       });
 
 
-    it('should return error for non-admin users', function (done) {
+    it('should return error for non-admin users', (done) => {
       api.put('/roles/2').set({ 'x-access-token': userToken })
         .send({ title: 'Member' })
         .expect(401).end((err, res) => {
@@ -167,8 +168,8 @@ describe('Role Tests', function () {
     });
   });
 
-  describe('Delete Role', function () {
-    it('should delete existing roles', function (done) {
+  describe('Delete Role', () => {
+    it('should delete existing roles', (done) => {
       api.delete('/roles/3').set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
@@ -182,9 +183,9 @@ describe('Role Tests', function () {
     });
 
     it('should return approprite message for roles that do not exist',
-      function (done) {
+      (done) => {
         api.delete('/roles/4').set({ 'x-access-token': adminToken })
-          .expect(400).end((err, res) => {
+          .expect(404).end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -194,7 +195,7 @@ describe('Role Tests', function () {
           });
       });
 
-    it('should return error for non-admin users', function (done) {
+    it('should return error for non-admin users', (done) => {
       api.delete('/roles/3').set({ 'x-access-token': userToken })
         .expect(401).end((err, res) => {
           if (err) {

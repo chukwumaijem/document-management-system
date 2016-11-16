@@ -14,7 +14,7 @@ const homeRoute = require('./app/routes/index'),
   roleRoutes = require('./app/routes/roles'),
   documentRoutes = require('./app/routes/documents');
 
-let app = express();
+const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -32,6 +32,10 @@ app.use(function (req, res) {
   });
 });
 
+app.use( function (err, req, res, next) {
+  console.log('error:' + err.message);
+  res.status(err.code || 500).json({ 'error': err.reason });
+})
 //set app port
 const port = process.env.PORT || 3000;
 models.sequelize.sync({ logging: false })

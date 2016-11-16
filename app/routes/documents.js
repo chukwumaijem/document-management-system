@@ -2,9 +2,10 @@
 
 const express = require('express'),
   documentRoutes = express.Router(),
-  docControl = new require('../controllers/documentController'),
+  docControl = require('../controllers/documentController'),
   authenticate = require('../middleware/auth'),
   userAccess = require('../middleware/userAccess');
+
 // Creates a new document instance.
 documentRoutes.post('/', authenticate, docControl.createDocument);
 
