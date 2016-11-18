@@ -1,10 +1,9 @@
-'use strict';
+const app = require('../../server');
+const expect = require('chai').expect;
+const supertest = require('supertest');
+const bcrypt = require('bcryptjs');
 
-const app = require('../../server'),
-  expect = require('chai').expect,
-  supertest = require('supertest'),
-  api = supertest(app),
-  bcrypt = require('bcryptjs');
+const api = supertest(app);
 
 describe('User Tests', () => {
   const userOne = {
@@ -14,7 +13,8 @@ describe('User Tests', () => {
     email: 'helen@nson.com',
     password: 'helenpass'
   };
-  let adminToken, userToken;
+  let adminToken;
+  let userToken;
 
   describe('Login User', () => {
     it('should login in a registered user.', (done) => {
@@ -85,7 +85,8 @@ describe('User Tests', () => {
   });
 
   describe('Create user', () => {
-    let resData, errData;
+    let resData;
+    let errData;
     it('should validate that required user data is provided',
       (done) => {
         api.post('/users')
@@ -292,10 +293,9 @@ describe('User Tests', () => {
             done();
           });
       });
-
   });
 
-  describe('Get user documents', () => {
+  describe('Get user\'s documents', () => {
     it('should return all user documents for admins and owners',
       (done) => {
         api.get('/users/3/documents').set({ 'x-access-token': adminToken })
@@ -360,8 +360,8 @@ describe('User Tests', () => {
     it('should update user if tokenid matches user or admin',
       (done) => {
         api.put('/users/7').set({ 'x-access-token': adminToken })
-          .send({ username: 'emmanuel' })
-          .expect(200).end((err, res) => {
+          .send({ username: 'emmanuel' }).expect(200)
+          .end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -370,8 +370,8 @@ describe('User Tests', () => {
           });
 
         api.put('/users/7').set({ 'x-access-token': newToken })
-          .send({ username: 'michael' })
-          .expect(200).end((err, res) => {
+          .send({ username: 'michael' }).expect(200)
+          .end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -393,8 +393,8 @@ describe('User Tests', () => {
           });
 
         api.put('/users/7').set({ 'x-access-token': userToken })
-          .send({ username: 'michael' })
-          .expect(401).end((err, res) => {
+          .send({ username: 'michael' }).expect(401)
+          .end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -408,7 +408,8 @@ describe('User Tests', () => {
     it('should update user role if tokenid matches admin token',
       (done) => {
         api.put('/users/7').set({ 'x-access-token': adminToken })
-          .send({ RoleId: 1 }).expect(200).end((err, res) => {
+          .send({ RoleId: 1 }).expect(200)
+          .end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -422,7 +423,8 @@ describe('User Tests', () => {
     it('should return error for user role update if tokenid does not' +
       'match admin token', (done) => {
       api.put('/users/7').set({ 'x-access-token': userToken })
-        .send({ RoleId: 1 }).expect(401).end((err, res) => {
+        .send({ RoleId: 1 }).expect(401)
+        .end((err, res) => {
           if (err) {
             return done(err);
           }
@@ -431,7 +433,7 @@ describe('User Tests', () => {
           done();
         });
     });
-  })
+  });
 
   describe('Delete user', () => {
     let newToken;
@@ -520,8 +522,7 @@ describe('User Tests', () => {
             done();
           });
       });
-  })
-
+  });
 });
 
 describe('Home route', () => {
@@ -550,7 +551,6 @@ describe('Home route', () => {
 });
 
 describe('Expired JWT Tests', () => {
-
   const expiredJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
     'eyJpZCI6MSwidXNlcm5hbWUiOiJlYnVrYSIsIlJvbGVJZCI6MSwiaWF0IjoxND' +
     'c4ODY1NDg0LCJleHAiOjE0Nzg4NjU1NDR9.z-Zfdcr1b3blN6KTdhDJdYF5oRjSQT3' +
@@ -594,4 +594,4 @@ describe('Expired JWT Tests', () => {
           done();
         });
     });
-})
+});

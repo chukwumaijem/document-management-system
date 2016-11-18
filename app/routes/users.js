@@ -1,32 +1,60 @@
-'use strict';
-// import userControl from '../controllers/userController';
+const express = require('express');
+const UserController = require('../controllers/userController');
+const adminAuth = require('../middleware/adminAuth');
+const authenticate = require('../middleware/auth');
+const userAccess = require('../middleware/userAccess');
 
-const express = require('express'),
-  userRoutes = express.Router(),
-  userControl = require('../controllers/userController'),
-  adminAuth = require('../middleware/adminAuth'),
-  authenticate = require('../middleware/auth'),
-  userAccess = require('../middleware/userAccess');
+const userRoutes = express.Router();
+const userControl = new UserController();
 
-// Logs a user in.
-userRoutes.post('/login', userControl.loginUser);
 
-// Creates a new user.
-userRoutes.post('/', userControl.createUser);
+/**
+  * Route for user login.
+  */
+userRoutes.post('/login', (req, res, next) => {
+  userControl.loginUser(req, res, next);
+});
 
-// Find users.
-userRoutes.get('/', adminAuth, userControl.getUsers);
+/**
+  * Route for user sign up.
+  */
+userRoutes.post('/', (req, res, next) => {
+  userControl.createUser(req, res, next);
+});
 
-// Find a user.
-userRoutes.get('/:id', authenticate, userControl.getUser);
+/**
+  * Route for getting all users data.
+  */
+userRoutes.get('/', adminAuth, (req, res, next) => {
+  userControl.getUsers(req, res, next);
+});
 
-// Find all documents belonging to the user
-userRoutes.get('/:id/documents', userAccess, userControl.getDocuments);
+/**
+  * Route for getting a particular user.
+  */
+userRoutes.get('/:id', authenticate, (req, res, next) => {
+  userControl.getUser(req, res, next);
+});
 
-// Update user attributes.
-userRoutes.put('/:id', authenticate, userControl.updateUser);
+/**
+  * Route for getting a users documents.
+  */
+userRoutes.get('/:id/documents', userAccess, (req, res, next) => {
+  userControl.getDocuments(req, res, next);
+});
 
-// Delete user.
-userRoutes.delete('/:id', authenticate, userControl.deleteUser);
+/**
+  * Route for updating user's data.
+  */
+userRoutes.put('/:id', authenticate, (req, res, next) => {
+  userControl.updateUser(req, res, next);
+});
+
+/**
+  * Route for deleting a user.
+  */
+userRoutes.delete('/:id', authenticate, (req, res, next) => {
+  userControl.deleteUser(req, res, next);
+});
 
 module.exports = userRoutes;

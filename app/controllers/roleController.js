@@ -1,31 +1,59 @@
-'use strict';
-
 const models = require('../models/dbconnect');
 
+
+  /**
+    * This class handles roles route
+    */
 class RoleControl {
 
+  /**
+    * This method creates a new role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   createRole(req, res, next) {
     models.Role.create(req.body).then((role) => {
       res.status(201)
         .send({
-          success: "New role created successfully."
+          success: 'New role created successfully.'
         });
     }).catch((err) => {
-      err.reason = 'Role already exists.';
-      err.code = 409;
-      next(err);
+      const error = err;
+      error.reason = 'Role already exists.';
+      error.code = 409;
+      next(error);
     });
   }
 
+  /**
+    * This method fetches all the roles
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   getRoles(req, res, next) {
     models.Role.findAll().then((role) => {
       res.json(role);
     }).catch((err) => {
-      err.reason = 'Error fetching role.';
-      next(err);
+      const error = err;
+      error.reason = 'Error fetching role.';
+      next(error);
     });
   }
 
+  /**
+    * This method update role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   updateRole(req, res, next) {
     models.Role.findOne({
       where: {
@@ -44,11 +72,20 @@ class RoleControl {
           title: role.title
         });
     }).catch((err) => {
-      err.reason = 'Role cannot be updated.';
-      next(err);
+      const error = err;
+      error.reason = 'Role cannot be updated.';
+      next(error);
     });
   }
 
+  /**
+    * This method deletes role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   deleteRole(req, res, next) {
     models.Role.findOne({
       where: { id: req.params.id }
@@ -63,8 +100,9 @@ class RoleControl {
         success: 'Role was deleted successfully.'
       });
     }).catch((err) => {
-      err.reason = 'Role cannot be deleted.';
-      next(err);
+      const error = err;
+      error.reason = 'Role cannot be deleted.';
+      next(error);
     });
   }
 
