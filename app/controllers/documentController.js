@@ -1,17 +1,30 @@
-'use strict';
+import models from '../models/dbconnect';
+import Helpers from './helperMethods';
 
-const models = require('../models/dbconnect'),
-  helpers = require('./helperMethods'),
-  helperMethods = new helpers(models);
+const helperMethods = new Helpers();
 
-class DocControl {
+/**
+  * Class DocControl. Handles document functions
+  *
+  * @returns {void}
+  */
+export default class DocControl {
+
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
   getDocuments(req, res, next) {
     models.Document.findAll({
       include: [
         { model: models.Role },
         { model: models.User, as: 'owner' }
       ],
-      order:[['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']]
     }).then((documents) => {
       res.send(helperMethods.filterDocs(req, documents));
     }).catch((err) => {
@@ -20,9 +33,17 @@ class DocControl {
     });
   }
 
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
   getDocument(req, res, next) {
     if (Object.keys(req.query).length) {
-      return helperMethods.searchDocument(req, res, next);
+      return this.searchDocument(req, res, next);
     }
     models.Document.findById(req.params.id, {
       include: [{ model: models.Role }, { model: models.User, as: 'owner' }]
@@ -44,6 +65,14 @@ class DocControl {
     });
   }
 
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
   createDocument(req, res, next) {
     req.ownerId = req.decoded.id;
     models.Document.create(req.body).then((document) => {
@@ -55,6 +84,14 @@ class DocControl {
     });
   }
 
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
   updateDocument(req, res, next) {
     models.Document.findOne({
       where: { id: req.params.id }
@@ -66,7 +103,7 @@ class DocControl {
         });
       } else {
         res.status(401)
-          .send({ error: "You do not have permission to update this document." });
+          .send({ error: 'You do not have permission to update this document.' });
       }
     }).catch((err) => {
       err.reason = 'Error updating documents.';
@@ -74,6 +111,14 @@ class DocControl {
     });
   }
 
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
   deleteDocument(req, res, next) {
     models.Document.findOne({
       where: { id: req.params.id }
@@ -85,13 +130,80 @@ class DocControl {
         });
       } else {
         res.status(401)
-          .send({ error: "You do not have permission to delete this document." });
+          .send({ error: 'You do not have permission to delete this document.' });
       }
     }).catch((err) => {
       err.reason = 'Error deleting documents.';
       next(err);
     });
   }
-}
 
-module.exports = new DocControl();
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {Object} res or next
+    */
+  searchDocument(req, res, next) {
+    models.Document.findAll({
+      include: [{ model: models.Role },
+      { model: models.User, as: 'owner' }
+      ],
+      order: [['createdAt', 'DESC']],
+      offset: req.query.start || 0
+    }).then((documents) => {
+      res.send(this.filterSearch(req.query, helperMethods.filterDocs(req, documents)));
+    }).catch((err) => {
+      err.reason = 'Error fetching documents.';
+      next(err);
+    });
+  }
+
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} date
+    * @param {Array} documents
+    * @returns {Boolean} true or false
+    */
+  dateFilter(date, documents) {
+    return documents.filter(document =>
+      date === JSON.stringify(document.createdAt).substr(1, 10));
+  }
+
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {String} role
+    * @param {Array} documents
+    * @returns {Object} true or false
+    */
+  roleFilter(role, documents) {
+    return documents.filter(document =>
+      role.toLowerCase() === document.Role.title.toLowerCase());
+  }
+
+  /**
+    * This method get all documents in the systems
+    *
+    * @param {Object} query
+    * @param {Array} docs
+    * @returns {Array} true or false
+    */
+  filterSearch(query, docs) {
+    let documents = docs;
+    if (query.date) {
+      documents = this.dateFilter(query.date, documents);
+    }
+    if (query.role) {
+      documents = this.roleFilter(query.role, documents);
+    }
+    if (query.limit && documents.length > query.limit) {
+      documents.length = query.limit;
+    }
+
+    return documents;
+  }
+}

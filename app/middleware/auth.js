@@ -1,12 +1,18 @@
-'use strict';
+import jwt from 'jsonwebtoken';
 
-const jwt = require('jsonwebtoken');
-
-const authenticate = function (req, res, next) {
+/**
+ * This function authenticates admins
+ *
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} next
+ * @returns {void}
+ */
+export default function authenticate(req, res, next) {
   const token = req.body.token || req.query.token ||
     req.headers['x-access-token'];
   if (token) {
-    jwt.verify(token, process.env.secret, function (err, decoded) {
+    jwt.verify(token, process.env.secret, (err, decoded) => {
       if (err) {
         return res.status(401)
           .json({ error: err.message });
@@ -20,6 +26,4 @@ const authenticate = function (req, res, next) {
       error: 'No token provided.'
     });
   }
-};
-
-module.exports = authenticate;
+}

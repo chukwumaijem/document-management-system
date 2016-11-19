@@ -1,12 +1,13 @@
-'use strict';
+import chai from 'chai';
+import supertest from 'supertest';
+import app from '../../server';
 
-const app = require('../../server'),
-  expect = require('chai').expect,
-  supertest = require('supertest'),
-  api = supertest(app);
+const expect = chai.expect;
+const api = supertest(app);
 
 describe('Search documents', () => {
-  let adminToken, userToken;
+  let adminToken;
+  let userToken;
 
   before((done) => {
     api.post('/users/login')
@@ -52,8 +53,7 @@ describe('Search documents', () => {
 
   it('should return documents that were published on a certain date',
     (done) => {
-      api.get('/documents/query?limit=5&date=' +
-        new Date().toISOString().substr(0, 10))
+      api.get(`/documents/query?limit=5&date=${new Date().toISOString().substr(0, 10)}`)
         .set({ 'x-access-token': adminToken })
         .expect(200).end((err, res) => {
           if (err) {
@@ -79,7 +79,7 @@ describe('Search documents', () => {
     });
 
   it('should return only public documents to guests', (done) => {
-    api.get('/documents/query?date=' + new Date().toISOString().substr(0, 10))
+    api.get(`/documents/query?date=${new Date().toISOString().substr(0, 10)}`)
       .expect(200).end((err, res) => {
         if (err) {
           return done(err);
@@ -92,7 +92,7 @@ describe('Search documents', () => {
 
   it('should show users their private documents and public documents',
     (done) => {
-      api.get('/documents/query?date=' + new Date().toISOString().substr(0, 10))
+      api.get(`/documents/query?date=${new Date().toISOString().substr(0, 10)}`)
         .set({ 'x-access-token': userToken })
         .expect(200).end((err, res) => {
           if (err) {
@@ -105,7 +105,7 @@ describe('Search documents', () => {
     });
 
   it('should return all documents to admins', (done) => {
-    api.get('/documents/query?date=' + new Date().toISOString().substr(0, 10))
+    api.get(`/documents/query?date=${new Date().toISOString().substr(0, 10)}`)
       .set({ 'x-access-token': adminToken })
       .expect(200).end((err, res) => {
         if (err) {
@@ -116,5 +116,4 @@ describe('Search documents', () => {
         done();
       });
   });
-
 });

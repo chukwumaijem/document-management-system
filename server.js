@@ -1,18 +1,15 @@
-'use strict';
-
-// set local env reader
-require('dotenv').config({ silent: true });
-
-const express = require('express'),
-  bodyParser = require('body-parser'),
-  models = require('./app/models/dbconnect'),
-  adminAuth = require('./app/middleware/adminAuth');
+import {} from 'dotenv/config';
+import express from 'express';
+import bodyParser from 'body-parser';
+import models from './app/models/dbconnect';
+import adminAuth from './app/middleware/adminAuth';
 
 // import app routes
-const homeRoute = require('./app/routes/index'),
-  userRoutes = require('./app/routes/users'),
-  roleRoutes = require('./app/routes/roles'),
-  documentRoutes = require('./app/routes/documents');
+import homeRoute from './app/routes/index';
+import userRoutes from './app/routes/users';
+import roleRoutes from './app/routes/roles';
+import documentRoutes from './app/routes/documents';
+
 
 const app = express();
 
@@ -26,17 +23,18 @@ app.use('/roles', adminAuth, roleRoutes);
 app.use('/documents', documentRoutes);
 
 // catch unknown routes
-app.use(function (req, res) {
+app.use((req, res) => {
   res.status(404).json({
     error: 'Requested route does not exist yet. Check back later. :wink:'
   });
 });
 
-app.use( function (err, req, res, next) {
-  console.log('error:' + err.message);
-  res.status(err.code || 500).json({ 'error': err.reason });
-})
-//set app port
+app.use((err, req, res, next) => {
+  console.log(`error: ${err.message}`);
+  res.status(err.code || 500).json({ error: err.reason });
+});
+
+// set app port
 const port = process.env.PORT || 3000;
 models.sequelize.sync({ logging: false })
   .then(() => {

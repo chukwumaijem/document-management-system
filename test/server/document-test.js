@@ -1,12 +1,13 @@
-'use strict';
+import chai from 'chai';
+import supertest from 'supertest';
+import app from '../../server';
 
-const app = require('../../server'),
-  expect = require('chai').expect,
-  supertest = require('supertest'),
-  api = supertest(app);
+const expect = chai.expect;
+const api = supertest(app);
 
 describe('Documents Test Suite', () => {
-  let adminToken, userToken;
+  let adminToken;
+  let userToken;
 
   before((done) => {
     api.post('/users/login').send({ username: 'ebuka', password: 'ebukaakubu' })
@@ -53,7 +54,7 @@ describe('Documents Test Suite', () => {
           return done(err);
         }
         expect(res.body).to.be.instanceof(Array);
-        for(let i = 0; i < res.body.length; i++) {
+        for (let i = 0; i < res.body.length; i += 1) {
           expect(res.body[i].public).to.be.true;
         }
         expect(res.body).to.have.lengthOf(2);
@@ -69,7 +70,7 @@ describe('Documents Test Suite', () => {
             return done(err);
           }
           expect(res.body).to.have.length.of.at.most(5);
-          for (let i = 0; i < res.body.length - 1; i++) {
+          for (let i = 0; i < res.body.length - 1; i += 1) {
             expect(res.body[i].id).to.be
               .above(res.body[i + 1].id);
           }
@@ -101,19 +102,19 @@ describe('Documents Test Suite', () => {
 
     it('should return documents in the order of published date' +
       ' from most recent', (done) => {
-        api.get('/documents/query?limit=5')
-          .set({ 'x-access-token': adminToken })
-          .expect(200).end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            for (let i = 0; i < res.body.length - 1; i++) {
-              expect(res.body[i].createdAt).to.be.at
-                .least(res.body[i + 1].createdAt);
-            }
-            done();
-          });
-      });
+      api.get('/documents/query?limit=5')
+        .set({ 'x-access-token': adminToken })
+        .expect(200).end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          for (let i = 0; i < res.body.length - 1; i += 1) {
+            expect(res.body[i].createdAt).to.be.at
+              .least(res.body[i + 1].createdAt);
+          }
+          done();
+        });
+    });
 
     it('should return a 404 for documents that do not exist', (done) => {
       api.get('/documents/223')
@@ -202,7 +203,6 @@ describe('Documents Test Suite', () => {
           done();
         });
     });
-
   });
 
   describe('Create Documents', () => {
@@ -221,8 +221,8 @@ describe('Documents Test Suite', () => {
 
     it('should create a document for a registered user', (done) => {
       api.post('/documents').set({ 'x-access-token': adminToken })
-        .send(docOne)
-        .expect(201).end((err, res) => {
+        .send(docOne).expect(201)
+        .end((err, res) => {
           if (err) {
             return done(err);
           }
@@ -246,8 +246,8 @@ describe('Documents Test Suite', () => {
 
     it('should create a published date for document', (done) => {
       api.post('/documents').set({ 'x-access-token': userToken })
-        .send(docTwo)
-        .expect(201).end((err, res) => {
+        .send(docTwo).expect(201)
+        .end((err, res) => {
           if (err) {
             return done(err);
           }
@@ -288,8 +288,8 @@ describe('Documents Test Suite', () => {
     it('should return an error if user is guest not the owner',
       (done) => {
         api.put('/documents/4').set({ 'x-access-token': userToken })
-          .send({ title: 'Can I edit?' })
-          .expect(401).end((err, res) => {
+          .send({ title: 'Can I edit?' }).expect(401)
+          .end((err, res) => {
             if (err) {
               return done(err);
             }
@@ -344,8 +344,6 @@ describe('Documents Test Suite', () => {
           expect(res.body.error).to.equal('No token provided.');
           done();
         });
-    })
-
+    });
   });
-
 });
