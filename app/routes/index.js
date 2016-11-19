@@ -1,11 +1,12 @@
-'use strict';
+import express from 'express';
 
-const express = require('express'),
-  homeRoute = express.Router();
+const homeRoute = express.Router();
 
-// Route for home page
+/**
+  * Route for the homepage.
+  */
 homeRoute.get('/', (req, res) => {
   res.json({ message: 'Welcome to Document Management App.' });
 });
 
-module.exports = homeRoute;
+export default homeRoute;

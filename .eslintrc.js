@@ -23,9 +23,22 @@ module.exports = {
     "no-sparse-arrays": 1, // disallow sparse arrays
     "no-unreachable": 1, // disallow unreachable statements after a return, throw, continue, or break statement
     "use-isnan": 1, // disallow comparisons with the value NaN
-    "valid-jsdoc": 0, // Ensure JSDoc comments are valid (off by default)
     "valid-typeof": 1, // Ensure that the results of typeof are compared against a valid string
-
+    "no-param-reassign": [2, {"props": false}],
+    "class-methods-use-this": 0,
+    "valid-jsdoc": ["error", {
+      "requireReturn": true,
+      "requireReturnType": true,
+      "requireParamDescription": false,
+      "requireReturnDescription": true
+    }],
+    "require-jsdoc": ["error", {
+        "require": {
+            "FunctionDeclaration": true,
+            "MethodDefinition": true,
+            "ClassDeclaration": true
+        }
+    }],
     // Best Practices
     // These are rules designed to prevent you from making mistakes. They either prescribe a better way of doing something or help you avoid footguns.
 
@@ -94,9 +107,10 @@ module.exports = {
     "no-use-before-define": 0, // disallow use of variables before they are defined
     "indent": [2, 2]
   },
+  "root": true,
+  "extends": "airbnb",
   "env": {
     "es6": true,
-    "browser": true,
     "mocha": true,
     "node": true
   }

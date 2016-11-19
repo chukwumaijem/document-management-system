@@ -1,8 +1,13 @@
-'use strict';
-
-module.exports = function (sequelize, DataTypes) {
+/**
+ * This function creates the Role model
+ *
+ * @param {Object} sequelize
+ * @param {Object} DataTypes
+ * @returns {Object} Role
+ */
+export default function (sequelize, DataTypes) {
   const Role = sequelize.define('Role', {
-    'title': {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
       notEmpty: true,
@@ -10,4 +15,4 @@ module.exports = function (sequelize, DataTypes) {
     }
   });
   return Role;
-}
+};

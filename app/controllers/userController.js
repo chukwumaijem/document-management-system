@@ -1,13 +1,23 @@
-'use strict';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import models from '../models/dbconnect';
+import Helpers from './helperMethods';
 
-const models = require('../models/dbconnect'),
-  helpers = require('./helperMethods'),
-  helperMethods = new helpers(models),
-  bcrypt = require('bcryptjs');
+const helperMethods = new Helpers();
 
-class UserControl {
+/**
+  * This class handles user routes
+  */
+export default class UserControl {
 
-  // login user control
+  /**
+    * This method filters documents based on access rights
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   loginUser(req, res, next) {
     if (!req.body.username) {
       res.status(400)
@@ -22,7 +32,11 @@ class UserControl {
     models.User.findOne({ where: { username: req.body.username } })
       .then((user) => {
         if (bcrypt.compareSync(req.body.password, user.password)) {
-          const token = helperMethods.createToken({ id: user.id, username: user.username, RoleId: user.RoleId });
+          const token = this.createToken({
+            id: user.id,
+            username: user.username,
+            RoleId: user.RoleId
+          });
           res.status(200)
             .send({
               success: 'Login successful.',
@@ -41,7 +55,14 @@ class UserControl {
       });
   }
 
-  // get user control
+  /**
+    * This method fetches all the users
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   getUser(req, res, next) {
     models.User.findOne({
       where: {
@@ -62,7 +83,15 @@ class UserControl {
     });
   }
 
-  // get all users. Only admins can access this route
+
+  /**
+    * This method fetches a specified users
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   getUsers(req, res, next) {
     models.User.findAll({
       include: [{
@@ -78,7 +107,15 @@ class UserControl {
       });
   }
 
-  // get documents belonging to this user
+
+  /**
+    * This method fetches a users' documents
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   getDocuments(req, res, next) {
     models.Document.findAll({
       where: { ownerId: req.params.id },
@@ -91,7 +128,15 @@ class UserControl {
     });
   }
 
-  // create new user control
+
+  /**
+    * This method creates a new user
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   createUser(req, res, next) {
     if (!req.body.username || !req.body.firstName ||
       !req.body.lastName || !req.body.email || !req.body.password) {
@@ -103,7 +148,7 @@ class UserControl {
 
     models.User.create(req.body)
       .then((user) => {
-        const token = helperMethods.createToken({
+        const token = this.createToken({
           id: user.id,
           username: user.username,
           RoleId: user.RoleId
@@ -121,7 +166,15 @@ class UserControl {
       });
   }
 
-  // update user data
+
+  /**
+    * This method updates users data
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   updateUser(req, res, next) {
     if (req.body.RoleId && req.decoded.RoleId !== 1) {
       res.status(401).send({ error: 'Only an admin can change roles.' });
@@ -136,7 +189,6 @@ class UserControl {
           success: 'User data updated.',
           user
         });
-        return;
       } else {
         res.status(401)
           .send({ error: 'You do not have permission to update user data.' });
@@ -147,7 +199,15 @@ class UserControl {
     });
   }
 
-  // update user data
+
+  /**
+    * This method deletes user
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   deleteUser(req, res, next) {
     models.User.findOne({
       where: { id: req.params.id }
@@ -155,18 +215,26 @@ class UserControl {
       if (user.id === req.decoded.id || req.decoded.RoleId === 1) {
         user.destroy();
         res.send({
-          success: "User data deleted.",
+          success: 'User data deleted.',
           username: user.username
         });
-        return;
       } else {
-        res.status(401).send({ error: "You do not have permission to delete user." });
+        res.status(401).send({ error: 'You do not have permission to delete user.' });
       }
     }).catch((err) => {
       err.reason = 'Cannot delete data.';
       next(err);
     });
   }
-}
 
-module.exports = new UserControl();
+
+  /**
+    * This method fetches all the users
+    *
+    * @param {Object} userdata
+    * @returns {String} token
+    */
+  createToken(userdata) {
+    return jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
+  }
+}
