@@ -1,10 +1,9 @@
-const models = require('../models/dbconnect');
-
+import models from '../models/dbconnect';
 
   /**
     * This class handles roles route
     */
-class RoleControl {
+export default class RoleControl {
 
   /**
     * This method creates a new role
@@ -21,10 +20,9 @@ class RoleControl {
           success: 'New role created successfully.'
         });
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Role already exists.';
-      error.code = 409;
-      next(error);
+      err.reason = 'Role already exists.';
+      err.code = 409;
+      next(err);
     });
   }
 
@@ -40,9 +38,8 @@ class RoleControl {
     models.Role.findAll().then((role) => {
       res.json(role);
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Error fetching role.';
-      next(error);
+      err.reason = 'Error fetching role.';
+      next(err);
     });
   }
 
@@ -72,9 +69,8 @@ class RoleControl {
           title: role.title
         });
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Role cannot be updated.';
-      next(error);
+      err.reason = 'Role cannot be updated.';
+      next(err);
     });
   }
 
@@ -100,12 +96,8 @@ class RoleControl {
         success: 'Role was deleted successfully.'
       });
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Role cannot be deleted.';
-      next(error);
+      err.reason = 'Role cannot be deleted.';
+      next(err);
     });
   }
-
 }
-
-module.exports = new RoleControl();

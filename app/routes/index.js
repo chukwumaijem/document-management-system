@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 
 const homeRoute = express.Router();
 
@@ -9,4 +9,4 @@ homeRoute.get('/', (req, res) => {
   res.json({ message: 'Welcome to Document Management App.' });
 });
 
-module.exports = homeRoute;
+export default homeRoute;

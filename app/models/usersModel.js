@@ -1,6 +1,13 @@
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
-module.exports = (sequelize, Sequelize) => {
+/**
+ * This function creates the User model
+ *
+ * @param {Object} sequelize
+ * @param {Object} Sequelize
+ * @returns {Object} User
+ */
+export default function (sequelize, Sequelize) {
   const User = sequelize.define('User', {
     firstName: {
       type: Sequelize.STRING,

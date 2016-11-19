@@ -1,12 +1,14 @@
-const models = require('../models/dbconnect');
-const helperMethods = require('./helperMethods');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import models from '../models/dbconnect';
+import Helpers from './helperMethods';
+
+const helperMethods = new Helpers();
 
 /**
   * This class handles user routes
   */
-class UserControl {
+export default class UserControl {
 
   /**
     * This method filters documents based on access rights
@@ -47,9 +49,8 @@ class UserControl {
             });
         }
       }).catch((err) => {
-        const error = err;
-        error.reason = 'Login failed.';
-        error.code = 404;
+        err.reason = 'Login failed.';
+        err.code = 404;
         next(err);
       });
   }
@@ -77,9 +78,8 @@ class UserControl {
         res.status(401).json({ error: 'You do not have permission to view user data.' });
       }
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Error getting user';
-      next(error);
+      err.reason = 'Error getting user';
+      next(err);
     });
   }
 
@@ -102,9 +102,8 @@ class UserControl {
         res.json(users);
       })
       .catch((err) => {
-        const error = err;
-        error.reason = 'Error getting users';
-        next(error);
+        err.reason = 'Error getting users';
+        next(err);
       });
   }
 
@@ -124,9 +123,8 @@ class UserControl {
     }).then((document) => {
       res.status(200).send(helperMethods.filterDocs(req, document));
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Error getting user documents';
-      next(error);
+      err.reason = 'Error getting user documents';
+      next(err);
     });
   }
 
@@ -162,10 +160,9 @@ class UserControl {
             success: 'User created.'
           });
       }).catch((err) => {
-        const error = err;
-        error.reason = 'User already exist.';
-        error.code = 409;
-        next(error);
+        err.reason = 'User already exist.';
+        err.code = 409;
+        next(err);
       });
   }
 
@@ -197,9 +194,8 @@ class UserControl {
           .send({ error: 'You do not have permission to update user data.' });
       }
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Update failed.';
-      next(error);
+      err.reason = 'Update failed.';
+      next(err);
     });
   }
 
@@ -226,9 +222,8 @@ class UserControl {
         res.status(401).send({ error: 'You do not have permission to delete user.' });
       }
     }).catch((err) => {
-      const error = err;
-      error.reason = 'Cannot delete data.';
-      next(error);
+      err.reason = 'Cannot delete data.';
+      next(err);
     });
   }
 
@@ -242,7 +237,4 @@ class UserControl {
   createToken(userdata) {
     return jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
   }
-
 }
-
-module.exports = UserControl;

@@ -1,7 +1,7 @@
-const express = require('express');
-const DocController = require('../controllers/documentController');
-const authenticate = require('../middleware/auth');
-const userAccess = require('../middleware/userAccess');
+import express from 'express';
+import DocController from '../controllers/documentController';
+import authenticate from '../middleware/auth';
+import userAccess from '../middleware/userAccess';
 
 const documentsRoute = express.Router();
 const docControl = new DocController();
@@ -41,4 +41,4 @@ documentsRoute.delete('/:id', authenticate, (req, res, next) => {
   docControl.deleteDocument(req, res, next);
 });
 
-module.exports = documentsRoute;
+export default documentsRoute;

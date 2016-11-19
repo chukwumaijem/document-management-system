@@ -1,7 +1,7 @@
 /**
   * This class contians functions used in many controllers.
   */
-const HelperMethod = {
+export default class HelperMethod {
 
   /**
     * This method filters documents based on access rights
@@ -23,7 +23,4 @@ const HelperMethod = {
       return isPublic || isAdmin || isOwner;
     });
   }
-
-};
-
-module.exports = HelperMethod;
+}

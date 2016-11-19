@@ -1,8 +1,9 @@
-const app = require('../../server');
-const expect = require('chai').expect;
-const supertest = require('supertest');
-const bcrypt = require('bcryptjs');
+import chai from 'chai';
+import supertest from 'supertest';
+import bcrypt from 'bcryptjs';
+import app from '../../server';
 
+const expect = chai.expect;
 const api = supertest(app);
 
 describe('User Tests', () => {

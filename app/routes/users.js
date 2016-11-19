@@ -1,8 +1,8 @@
-const express = require('express');
-const UserController = require('../controllers/userController');
-const adminAuth = require('../middleware/adminAuth');
-const authenticate = require('../middleware/auth');
-const userAccess = require('../middleware/userAccess');
+import express from 'express';
+import adminAuth from '../middleware/adminAuth';
+import authenticate from '../middleware/auth';
+import userAccess from '../middleware/userAccess';
+import UserController from '../controllers/userController';
 
 const userRoutes = express.Router();
 const userControl = new UserController();
@@ -57,4 +57,4 @@ userRoutes.delete('/:id', authenticate, (req, res, next) => {
   userControl.deleteUser(req, res, next);
 });
 
-module.exports = userRoutes;
+export default userRoutes;

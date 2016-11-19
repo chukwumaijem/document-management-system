@@ -1,6 +1,14 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-const authenticate = (req, res, next) => {
+/**
+ * This function authenticates admins
+ *
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} next
+ * @returns {void}
+ */
+export default function authenticate(req, res, next) {
   const token = req.body.token || req.query.token ||
     req.headers['x-access-token'];
   if (token) {
@@ -18,6 +26,4 @@ const authenticate = (req, res, next) => {
       error: 'No token provided.'
     });
   }
-};
-
-module.exports = authenticate;
+}

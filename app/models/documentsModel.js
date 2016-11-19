@@ -1,4 +1,11 @@
-module.exports = (sequelize, Sequelize) => {
+/**
+ * This function creates the Document model
+ *
+ * @param {Object} sequelize
+ * @param {Object} Sequelize
+ * @returns {Object} Document
+ */
+export default function (sequelize, Sequelize) {
   const Document = sequelize.define('Document', {
     title: {
       type: Sequelize.STRING,

@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
 
 const sequelize = new Sequelize(process.env.database,
   process.env.dbusername, process.env.dbpassword, {
@@ -18,9 +18,7 @@ const db = {};
 
 fs
   .readdirSync(__dirname)
-  .filter((file) => {
-    return (file.indexOf('.') !== 0) && (file !== 'dbconnect.js');
-  })
+  .filter(file => (file.indexOf('.') !== 0) && (file !== 'dbconnect.js'))
   .forEach((file) => {
     const model = sequelize.import(path.join(__dirname, file));
     db[model.name] = model;

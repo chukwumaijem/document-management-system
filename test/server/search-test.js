@@ -1,7 +1,8 @@
-const app = require('../../server');
-const expect = require('chai').expect;
-const supertest = require('supertest');
+import chai from 'chai';
+import supertest from 'supertest';
+import app from '../../server';
 
+const expect = chai.expect;
 const api = supertest(app);
 
 describe('Search documents', () => {

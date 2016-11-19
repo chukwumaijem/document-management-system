@@ -1,16 +1,15 @@
-// set local env reader
-require('dotenv').config({ silent: true });
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const models = require('./app/models/dbconnect');
-const adminAuth = require('./app/middleware/adminAuth');
+import {} from 'dotenv/config';
+import express from 'express';
+import bodyParser from 'body-parser';
+import models from './app/models/dbconnect';
+import adminAuth from './app/middleware/adminAuth';
 
 // import app routes
-const homeRoute = require('./app/routes/index');
-const userRoutes = require('./app/routes/users');
-const roleRoutes = require('./app/routes/roles');
-const documentRoutes = require('./app/routes/documents');
+import homeRoute from './app/routes/index';
+import userRoutes from './app/routes/users';
+import roleRoutes from './app/routes/roles';
+import documentRoutes from './app/routes/documents';
+
 
 const app = express();
 

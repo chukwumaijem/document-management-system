@@ -1,12 +1,14 @@
-const models = require('../models/dbconnect');
-const helperMethods = require('./helperMethods');
+import models from '../models/dbconnect';
+import Helpers from './helperMethods';
+
+const helperMethods = new Helpers();
 
 /**
   * Class DocControl. Handles document functions
   *
   * @returns {void}
   */
-class DocControl {
+export default class DocControl {
 
   /**
     * This method get all documents in the systems
@@ -205,5 +207,3 @@ class DocControl {
     return documents;
   }
 }
-
-module.exports = DocControl;
