@@ -1,23 +1,23 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import models from '../models/dbconnect';
-import Helpers from './helperMethods';
+import Helpers from './Helpers';
 
 const helperMethods = new Helpers();
 
 /**
-  * This class handles user routes
-  */
-export default class UserControl {
+ * This class handles user routes
+ */
+export default class UserController {
 
   /**
-    * This method filters documents based on access rights
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method logs in a user
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   loginUser(req, res, next) {
     if (!req.body.username) {
       res.status(400)
@@ -56,13 +56,13 @@ export default class UserControl {
   }
 
   /**
-    * This method fetches all the users
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method fetches all the users
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   getUser(req, res, next) {
     models.User.findOne({
       where: {
@@ -85,13 +85,13 @@ export default class UserControl {
 
 
   /**
-    * This method fetches a specified users
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method fetches a specified user's data
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   getUsers(req, res, next) {
     models.User.findAll({
       include: [{
@@ -109,13 +109,13 @@ export default class UserControl {
 
 
   /**
-    * This method fetches a users' documents
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method fetches a users' documents
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   getDocuments(req, res, next) {
     models.Document.findAll({
       where: { ownerId: req.params.id },
@@ -130,13 +130,13 @@ export default class UserControl {
 
 
   /**
-    * This method creates a new user
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method creates a new user
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   createUser(req, res, next) {
     if (!req.body.username || !req.body.firstName ||
       !req.body.lastName || !req.body.email || !req.body.password) {
@@ -168,13 +168,13 @@ export default class UserControl {
 
 
   /**
-    * This method updates users data
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method updates users data
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   updateUser(req, res, next) {
     if (req.body.RoleId && req.decoded.RoleId !== 1) {
       res.status(401).send({ error: 'Only an admin can change roles.' });
@@ -201,13 +201,13 @@ export default class UserControl {
 
 
   /**
-    * This method deletes user
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method deletes user
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   deleteUser(req, res, next) {
     models.User.findOne({
       where: { id: req.params.id }
@@ -229,11 +229,11 @@ export default class UserControl {
 
 
   /**
-    * This method fetches all the users
-    *
-    * @param {Object} userdata
-    * @returns {String} token
-    */
+   * This method creates tokens for users
+   *
+   * @param {Object} userdata
+   * @returns {String} token
+   */
   createToken(userdata) {
     return jwt.sign(userdata, process.env.secret, { expiresIn: 60 });
   }

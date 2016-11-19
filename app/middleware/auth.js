@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 /**
- * This function authenticates admins
+ * This function gives access only to registered users
  *
  * @param {Object} req
  * @param {Object} res

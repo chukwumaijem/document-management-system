@@ -1,18 +1,18 @@
 import models from '../models/dbconnect';
 
   /**
-    * This class handles roles route
-    */
-export default class RoleControl {
+   * This class handles roles route
+   */
+export default class RoleController {
 
   /**
-    * This method creates a new role
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method creates a new role
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   createRole(req, res, next) {
     models.Role.create(req.body).then((role) => {
       res.status(201)
@@ -27,13 +27,13 @@ export default class RoleControl {
   }
 
   /**
-    * This method fetches all the roles
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method fetches all the roles
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   getRoles(req, res, next) {
     models.Role.findAll().then((role) => {
       res.json(role);
@@ -44,13 +44,13 @@ export default class RoleControl {
   }
 
   /**
-    * This method update role
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method updates role
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   updateRole(req, res, next) {
     models.Role.findOne({
       where: {
@@ -75,13 +75,13 @@ export default class RoleControl {
   }
 
   /**
-    * This method deletes role
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {void}
-    */
+   * This method deletes role
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {void}
+   */
   deleteRole(req, res, next) {
     models.Role.findOne({
       where: { id: req.params.id }
