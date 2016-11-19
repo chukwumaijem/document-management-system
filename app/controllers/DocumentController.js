@@ -4,12 +4,13 @@ import Helpers from './Helpers';
 const helperMethods = new Helpers();
 
 /**
- * Class DocControl. Handles document functions
+ * DocumentController class
+ * Contains functions for manipulating documents
  */
 export default class DocumentController {
 
   /**
-   * This method get all documents in the systems
+   * This method gets all documents in the system
    *
    * @param {Object} req
    * @param {Object} res
@@ -32,7 +33,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method gets all a specified document
    *
    * @param {Object} req
    * @param {Object} res
@@ -64,7 +65,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method creates a new document.
    *
    * @param {Object} req
    * @param {Object} res
@@ -83,7 +84,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method updates a document.
    *
    * @param {Object} req
    * @param {Object} res
@@ -110,7 +111,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method deletes a document
    *
    * @param {Object} req
    * @param {Object} res
@@ -137,7 +138,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method get documents using the query options
    *
    * @param {Object} req
    * @param {Object} res
@@ -160,7 +161,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method filters documents by date
    *
    * @param {Object} date
    * @param {Array} documents
@@ -172,7 +173,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method filters documents by role
    *
    * @param {String} role
    * @param {Array} documents
@@ -184,7 +185,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get all documents in the systems
+   * This method filters documents
    *
    * @param {Object} query
    * @param {Array} docs

@@ -44,7 +44,7 @@ export default class RoleController {
   }
 
   /**
-   * This method update role
+   * This method updates role
    *
    * @param {Object} req
    * @param {Object} res

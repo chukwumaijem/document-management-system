@@ -11,7 +11,7 @@ const helperMethods = new Helpers();
 export default class UserController {
 
   /**
-   * This method filters documents based on access rights
+   * This method logs in a user
    *
    * @param {Object} req
    * @param {Object} res
@@ -85,7 +85,7 @@ export default class UserController {
 
 
   /**
-   * This method fetches a specified users
+   * This method fetches a specified user's data
    *
    * @param {Object} req
    * @param {Object} res
@@ -229,7 +229,7 @@ export default class UserController {
 
 
   /**
-   * This method fetches all the users
+   * This method creates tokens for users
    *
    * @param {Object} userdata
    * @returns {String} token
