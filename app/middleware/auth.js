@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 /**
- * This function gives access on to registered users
+ * This function gives access only to registered users
  *
  * @param {Object} req
  * @param {Object} res

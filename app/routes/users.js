@@ -29,14 +29,14 @@ userRoutes.get('/', adminAuth, (req, res, next) => {
 });
 
 /**
- * Route for getting a particular user.
+ * Route for getting a particular user's data.
  */
 userRoutes.get('/:id', authenticate, (req, res, next) => {
   userControl.getUser(req, res, next);
 });
 
 /**
- * Route for getting a users documents.
+ * Route for getting a user's documents.
  */
 userRoutes.get('/:id/documents', userAccess, (req, res, next) => {
   userControl.getDocuments(req, res, next);

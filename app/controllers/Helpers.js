@@ -1,5 +1,5 @@
 /**
- * This class contians functions used in many controllers.
+ * This class contains functions used in many controllers.
  */
 export default class Helpers {
 
