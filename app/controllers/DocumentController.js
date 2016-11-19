@@ -33,7 +33,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method gets all a specified document
+   * This method gets a specified document
    *
    * @param {Object} req
    * @param {Object} res
@@ -138,7 +138,7 @@ export default class DocumentController {
   }
 
   /**
-   * This method get documents using the query options
+   * This method get documents using query options
    *
    * @param {Object} req
    * @param {Object} res
