@@ -1,23 +1,21 @@
 import models from '../models/dbconnect';
-import Helpers from './helperMethods';
+import Helpers from './Helpers';
 
 const helperMethods = new Helpers();
 
 /**
-  * Class DocControl. Handles document functions
-  *
-  * @returns {void}
-  */
-export default class DocControl {
+ * Class DocControl. Handles document functions
+ */
+export default class DocumentController {
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   getDocuments(req, res, next) {
     models.Document.findAll({
       include: [
@@ -34,13 +32,13 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   getDocument(req, res, next) {
     if (Object.keys(req.query).length) {
       return this.searchDocument(req, res, next);
@@ -66,13 +64,13 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   createDocument(req, res, next) {
     req.ownerId = req.decoded.id;
     models.Document.create(req.body).then((document) => {
@@ -85,13 +83,13 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   updateDocument(req, res, next) {
     models.Document.findOne({
       where: { id: req.params.id }
@@ -112,13 +110,13 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   deleteDocument(req, res, next) {
     models.Document.findOne({
       where: { id: req.params.id }
@@ -139,13 +137,13 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} req
-    * @param {Object} res
-    * @param {Object} next
-    * @returns {Object} res or next
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   * @returns {Object} res or next
+   */
   searchDocument(req, res, next) {
     models.Document.findAll({
       include: [{ model: models.Role },
@@ -162,36 +160,36 @@ export default class DocControl {
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} date
-    * @param {Array} documents
-    * @returns {Boolean} true or false
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} date
+   * @param {Array} documents
+   * @returns {Boolean} true or false
+   */
   dateFilter(date, documents) {
     return documents.filter(document =>
       date === JSON.stringify(document.createdAt).substr(1, 10));
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {String} role
-    * @param {Array} documents
-    * @returns {Object} true or false
-    */
+   * This method get all documents in the systems
+   *
+   * @param {String} role
+   * @param {Array} documents
+   * @returns {Object} true or false
+   */
   roleFilter(role, documents) {
     return documents.filter(document =>
       role.toLowerCase() === document.Role.title.toLowerCase());
   }
 
   /**
-    * This method get all documents in the systems
-    *
-    * @param {Object} query
-    * @param {Array} docs
-    * @returns {Array} true or false
-    */
+   * This method get all documents in the systems
+   *
+   * @param {Object} query
+   * @param {Array} docs
+   * @returns {Array} true or false
+   */
   filterSearch(query, docs) {
     let documents = docs;
     if (query.date) {

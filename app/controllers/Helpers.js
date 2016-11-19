@@ -1,15 +1,15 @@
 /**
-  * This class contians functions used in many controllers.
-  */
-export default class HelperMethod {
+ * This class contians functions used in many controllers.
+ */
+export default class Helpers {
 
   /**
-    * This method filters documents based on access rights
-    *
-    * @param {Object} req
-    * @param {Object} docs
-    * @returns {Boolean} true or false
-    */
+   * This method filters documents based on access rights
+   *
+   * @param {Object} req
+   * @param {Object} docs
+   * @returns {Boolean} true or false
+   */
   filterDocs(req, docs) {
     let documents = docs;
     if (!Array.isArray(docs)) {
