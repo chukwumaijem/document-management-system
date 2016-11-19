@@ -1,17 +1,16 @@
-'use strict';
+const moment = require('moment');
 
-const moment = require('moment'),
-  roleData = [
+const roleData = [
     { title: 'Admin' },
     { title: 'User' }
-  ],
-  userData = [
+];
+const userData = [
     { username: 'ebuka', firstName: 'Ebuka', lastName: 'Akubuike', email: 'ebuka@akubu.com', password: 'ebukaakubu', RoleId: '1' },
     { username: 'emeka', firstName: 'Emeka', lastName: 'Anaku', email: 'emeka@aanu.com', password: 'emekaanaku', RoleId: '2' },
     { username: 'adaobi', firstName: 'Adaobi', lastName: 'Mmadu', email: 'adaobi@mma.com', password: 'mmaduada', RoleId: '2' },
     { username: 'Mmali', firstName: 'Omali', lastName: 'Sinna', email: 'sinna@omali.com', password: 'omalicha', RoleId: '2' },
-  ],
-  documentData = [
+];
+const documentData = [
     { title: 'Secret file', content: 'This is a really confidential file..', RoleId: '1', ownerId: '1',
       createdAt: moment().add(-10, 'seconds').utc().format(), updatedAt: moment().add().utc().format() },
     { title: 'Another day in paradise', content: 'But seriously, Phil Collins.', public: false, RoleId: '2', ownerId: '2',
@@ -28,20 +27,18 @@ const moment = require('moment'),
       createdAt: moment().add(-4, 'seconds').utc().format(), updatedAt: moment().add().utc().format() },
     { title: 'Here as in heaven', content: 'A miracle can happen now, for the spirit of...', RoleId: '2', ownerId: '4',
       createdAt: moment().add(-3, 'seconds').utc().format(), updatedAt: moment().add().utc().format() }
-  ];
+];
 
-module.exports = function (models) {
-
+module.exports = (models) => {
   models.Role.bulkCreate(roleData)
-    .then(function () {
+    .then(() => {
       models.User.bulkCreate(userData, { individualHooks: true })
-        .then(function () {
+        .then(() => {
           models.Document.bulkCreate(documentData);
         }).catch((err) => {
           console.log(err.message);
-        })
+        });
     }).catch((err) => {
       console.log(err.message);
     });
-
 };

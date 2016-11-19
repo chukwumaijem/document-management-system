@@ -1,14 +1,23 @@
-'use strict';
+import models from '../models/dbconnect';
 
-const models = require('../models/dbconnect');
+  /**
+    * This class handles roles route
+    */
+export default class RoleControl {
 
-class RoleControl {
-
+  /**
+    * This method creates a new role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   createRole(req, res, next) {
     models.Role.create(req.body).then((role) => {
       res.status(201)
         .send({
-          success: "New role created successfully."
+          success: 'New role created successfully.'
         });
     }).catch((err) => {
       err.reason = 'Role already exists.';
@@ -17,6 +26,14 @@ class RoleControl {
     });
   }
 
+  /**
+    * This method fetches all the roles
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   getRoles(req, res, next) {
     models.Role.findAll().then((role) => {
       res.json(role);
@@ -26,6 +43,14 @@ class RoleControl {
     });
   }
 
+  /**
+    * This method update role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   updateRole(req, res, next) {
     models.Role.findOne({
       where: {
@@ -49,6 +74,14 @@ class RoleControl {
     });
   }
 
+  /**
+    * This method deletes role
+    *
+    * @param {Object} req
+    * @param {Object} res
+    * @param {Object} next
+    * @returns {void}
+    */
   deleteRole(req, res, next) {
     models.Role.findOne({
       where: { id: req.params.id }
@@ -67,7 +100,4 @@ class RoleControl {
       next(err);
     });
   }
-
 }
-
-module.exports = new RoleControl();
