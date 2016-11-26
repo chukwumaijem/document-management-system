@@ -1,5 +1,5 @@
-require('dotenv').config({ silent: true });
-const models = require('./app/models/dbconnect');
+import {} from 'dotenv/config';
+import models from './app/models/dbconnect';
 
 models.sequelize.sync({ logging: false })
   .then(() => {

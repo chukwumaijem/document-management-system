@@ -1,8 +1,9 @@
-import {} from 'dotenv/config';
+import { } from 'dotenv/config';
 import express from 'express';
 import bodyParser from 'body-parser';
 import models from './app/models/dbconnect';
 import adminAuth from './app/middleware/adminAuth';
+import Logger from './tracer';
 
 // import app routes
 import homeRoute from './app/routes/index';
@@ -30,7 +31,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(`error: ${err.message}`);
+  Logger.error(`error: ${err.message}`);
   res.status(err.code || 500).json({ error: err.reason });
 });
 
@@ -40,10 +41,10 @@ models.sequelize.sync({ logging: false })
   .then(() => {
     app.listen(port, (err) => {
       if (!err) {
-        console.log(`App started on port: ${port}...`);
+        Logger.info(`App started on port: ${port}...`);
       }
     });
   });
 
 // export app for supertest testing
-module.exports = app;
+export default app;

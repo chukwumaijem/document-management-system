@@ -29,7 +29,8 @@
     "jsonwebtoken": "^7.1.9",
     "pg": "^6.1.0",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^3.24.3"
+    "sequelize": "^3.24.3",
+    "tracer": "^0.8.7"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
